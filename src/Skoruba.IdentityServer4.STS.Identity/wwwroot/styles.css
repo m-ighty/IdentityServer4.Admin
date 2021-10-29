@@ -54,10 +54,17 @@ body {
     padding: 10px;
 }
 
-    .c-login__form .c-login__header h1 {
-        margin: 0;
-        font-size: 40px;
-    }
+h1 {
+    margin: 0;
+    font-size: 40px;
+}
+
+h2 {
+    color: var(--linde-blue);
+    margin: 0;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
 
 .c-login__header .c-sub {
     font-size: 20px;
@@ -166,13 +173,6 @@ li + li {
 
 .c-validation-errors + form {
     margin-top: 10px;
-}
-
-.c-external-login h2 {
-    color: var(--linde-blue);
-    margin: 0;
-    font-size: 20px;
-    margin-bottom: 10px;
 }
 
 form + .c-external-login {

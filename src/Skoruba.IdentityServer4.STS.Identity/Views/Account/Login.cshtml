@@ -20,7 +20,7 @@
             {
                 <div asp-validation-summary="All" class="c-validation-errors"></div>
             }
-            <form id="login-form" asp-route="Login">
+            <form id="login-form" asp-route="Login" method="post">
                 <input type="hidden" asp-for="ReturnUrl" />
                 <div class="c-form-group">
                     <label for="username">Username</label>
