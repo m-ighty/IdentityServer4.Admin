@@ -1,0 +1,20 @@
+﻿@using IdentityServer4.Extensions
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity
+@using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces
+@inject IRootConfiguration RootConfiguration
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/styles.css" />
+    <title>@RootConfiguration.AdminConfiguration.PageTitle</title>
+</head>
+<body>
+    <img class="c-logo" src="~/images/linde_plc_logo_combi.png" alt="Logo">
+    @RenderBody()
+</body>
+</html>

@@ -1,0 +1,180 @@
+:root {
+    --font-family: "LindeDaxGlobal", Arial, Helvetica, sans-serif;
+    --linde-blue: #005591;
+    --linde-light-grey: #d2e1eb;
+    --steel-blue: #457aa1;
+    --light-steel-blue: #b9cdd7;
+    --darker-blue: #196b9e;
+    --darkest-blue: #003b6b;
+    --secondary-color: #00a1e2;
+    --white: #fff;
+    --error-color: #e1000f;
+}
+
+@font-face {
+    font-family: "LindeDaxGlobal";
+    src: url("./assets/fonts/lindedaxregweb.woff2") format("woff2"), url("./assets/fonts/lindedaxregweb.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+html,
+body {
+    height: 100%;
+    font-family: var(--font-family);
+    margin: 0;
+}
+
+.c-logo {
+    height: 60px;
+    position: absolute;
+    top: 24px;
+    right: 48px;
+}
+
+.c-login {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .c-login * {
+        box-sizing: border-box;
+    }
+
+    .c-login .c-login__form {
+        width: 500px;
+    }
+
+.c-login__form .c-login__header {
+    border-left: 2px solid var(--linde-blue);
+    line-height: 50px;
+    color: var(--linde-blue);
+    padding: 10px;
+}
+
+    .c-login__form .c-login__header h1 {
+        margin: 0;
+        font-size: 40px;
+    }
+
+.c-login__header .c-sub {
+    font-size: 20px;
+}
+
+.c-login__form .c-login__body {
+    margin: 10px 0;
+    border-top: 1px solid var(--linde-light-grey);
+    border-bottom: 1px solid var(--linde-light-grey);
+    padding: 20px 0;
+}
+
+.c-login__form .c-login__footer {
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.c-login__footer.c-space-between {
+    justify-content: space-between;
+}
+
+.c-form-group label {
+    font-size: 16px;
+    color: var(--steel-blue);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.c-form-group input {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--light-steel-blue);
+    box-shadow: inset 2px 2px 6px rgb(199 215 223 / 80%);
+    height: 40px;
+    outline: none;
+    transition: 0.15s ease-in-out;
+    padding: 4px 11px;
+    color: var(--steel-blue);
+}
+
+    .c-form-group input:focus {
+        box-shadow: 0 0 0 2px rgb(0 85 145 / 20%);
+    }
+
+    .c-form-group input:hover {
+        border-color: var(--darker-blue);
+    }
+
+.c-form-group + .c-form-group {
+    margin-top: 10px;
+}
+
+.c-button {
+    background-color: var(--secondary-color);
+    border-style: none;
+    color: var(--white);
+    height: 40px;
+    font-size: 16px;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: 0.15s ease-in-out;
+    text-decoration: none;
+    line-height: 40px;
+    display: inline-block;
+}
+
+    .c-button + .c-button {
+        margin-left: 10px;
+    }
+
+    .c-button:hover {
+        background-color: var(--darker-blue);
+    }
+
+    .c-button:active {
+        background-color: var(--darkest-blue);
+    }
+
+.c-form-group.c-checkbox input {
+    display: inline;
+    width: auto;
+    height: auto;
+    accent-color: var(--darkest-blue);
+}
+
+.c-form-group.c-checkbox label {
+    display: inline;
+    user-select: none;
+}
+
+    .c-form-group.c-checkbox label::before {
+        content: " ";
+    }
+
+.c-validation-errors ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    color: var(--error-color);
+}
+
+li + li {
+    margin-top: 5px;
+}
+
+.c-validation-errors + form {
+    margin-top: 10px;
+}
+
+.c-external-login h2 {
+    color: var(--linde-blue);
+    margin: 0;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+form + .c-external-login {
+    margin-top: 10px;
+}
