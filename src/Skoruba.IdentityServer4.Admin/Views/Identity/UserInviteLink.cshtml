@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces.IUserInviteLinkDto
+@inject IViewLocalizer Localizer
+
+@{
+    ViewBag.Title = Localizer["PageTitle"];
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Users">@Localizer["NavigationUsers"]</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="col-12">
+        <h2>@Localizer["PageTitle"]</h2>
+    </div>
+</div>

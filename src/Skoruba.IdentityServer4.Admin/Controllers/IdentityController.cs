@@ -62,6 +62,15 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Organizations(int? page, string search)
+        {
+            ViewBag.Search = search;
+            var organizations = await _identityService.GetOrganizationsAsync(search, page ?? 1);
+
+            return View(organizations);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Roles(int? page, string search)
         {
             ViewBag.Search = search;
@@ -176,6 +185,14 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             if (user == null) return NotFound();
 
             return View("UserProfile", user);
+        }
+
+        [HttpGet]
+        public IActionResult UserInviteLink()
+        {
+            var newUserInviteLink = new UserInviteLinkDto();
+
+            return View("UserInviteLink", newUserInviteLink);
         }
 
         [HttpGet]
