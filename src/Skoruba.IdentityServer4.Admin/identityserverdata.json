@@ -99,7 +99,8 @@
                     "https://localhost:44303/signout-callback-oidc"
                 ],
                 "AllowedCorsOrigins": [
-                    "https://localhost:44303"
+                  "https://localhost:44303",
+                  "http://localhost:52930"
                 ],
                 "AllowedScopes": [
                     "openid",
@@ -122,9 +123,10 @@
                 "AllowedScopes": [
                     "skoruba_identity_admin_api"
                 ],
-                "AllowedCorsOrigins": [
-                    "https://localhost:44302"
-                ]
+              "AllowedCorsOrigins": [
+                "https://localhost:44302",
+                "http://localhost:52930"
+              ]
             }
         ]
     }

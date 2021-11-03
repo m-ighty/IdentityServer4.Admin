@@ -149,6 +149,31 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 }
             }
 
+            // Add the roles for linde-pdmt:
+            if(identityDataConfiguration.LindePdmtRoles.Any() && !await roleManager.Roles.AnyAsync(r => r.Name == identityDataConfiguration.LindePdmtRoles.First().Name))
+            {
+                foreach (var r in identityDataConfiguration.LindePdmtRoles)
+                {
+                    if (!await roleManager.RoleExistsAsync(r.Name))
+                    {
+                        var role = new TRole
+                        {
+                            Name = r.Name
+                        };
+
+                        var result = await roleManager.CreateAsync(role);
+
+                        if (result.Succeeded)
+                        {
+                            foreach (var claim in r.Claims)
+                            {
+                                await roleManager.AddClaimAsync(role, new System.Security.Claims.Claim(claim.Type, claim.Value));
+                            }
+                        }
+                    }
+                }
+            }
+
             if (!await userManager.Users.AnyAsync())
             {
                 // adding users from seed
