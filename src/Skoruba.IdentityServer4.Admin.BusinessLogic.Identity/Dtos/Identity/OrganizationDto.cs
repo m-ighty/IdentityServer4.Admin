@@ -7,7 +7,15 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
 {
     public class OrganizationDto : IOrganizationDto
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string Name { get; set; }
+
+        public OrganizationDto() {}
+
+        public OrganizationDto(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
     }
 }

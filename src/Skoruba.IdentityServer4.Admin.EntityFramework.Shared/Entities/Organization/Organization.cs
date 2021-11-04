@@ -8,5 +8,18 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organiza
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
+        public Organization() {}
+
+        public Organization(string name)
+        {
+            Name = name;
+        }
+
+        public Organization UpdateName(string name)
+        {
+            Name = name;
+            return this;
+        }
     }
 }

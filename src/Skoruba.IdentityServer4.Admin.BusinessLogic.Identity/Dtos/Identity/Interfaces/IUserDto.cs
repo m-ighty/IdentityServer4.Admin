@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common;
+using System;
+using System.Collections.Generic;
 
 namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces
 {
@@ -13,5 +15,7 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Int
         bool TwoFactorEnabled { get; set; }
         int AccessFailedCount { get; set; }
         DateTimeOffset? LockoutEnd { get; set; }
+        List<SelectItemDto> OrganizationList { get; set; }
+        string OrganizationId { get; set; }
     }
 }

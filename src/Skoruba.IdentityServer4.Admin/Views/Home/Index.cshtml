@@ -53,40 +53,52 @@
 	</div>
 </div>
 <div class="card-deck mb-3 text-center">
-	<!-- Persisted Grants -->
-	<div class="card mb-4 box-shadow">
-		<div class="card-header">
-			<h4 class="my-0 font-weight-normal">@Localizer["ButtonPersistedGrants"]</h4>
-		</div>
-		<div class="card-body">
-			<h1 class="card-title">
-				<span class="oi oi-key" title="Persisted Grants" aria-hidden="true"></span>
-			</h1>
-			<a asp-controller="Grant" asp-action="PersistedGrants" class="btn btn-lg btn-block btn-outline-primary">@Localizer["ButtonManage"]</a>
-		</div>
-	</div>
-	<!-- Users -->
-	<div class="card mb-4 box-shadow">
-		<div class="card-header">
-			<h4 class="my-0 font-weight-normal">@Localizer["ButtonUsers"]</h4>
-		</div>
-		<div class="card-body">
-			<h1 class="card-title">
-				<span class="oi oi-person" title="Users" aria-hidden="true"></span>
-			</h1>
-			<a asp-controller="Identity" asp-action="Users" class="btn btn-lg btn-block btn-primary">@Localizer["ButtonManage"]</a>
-		</div>
-	</div>
-	<!-- Roles -->
-	<div class="card mb-4 box-shadow">
-		<div class="card-header">
-			<h4 class="my-0 font-weight-normal">@Localizer["ButtonRoles"]</h4>
-		</div>
-		<div class="card-body">
-			<h1 class="card-title">
-				<span class="oi oi-lock-locked" title="Roles" aria-hidden="true"></span>
-			</h1>
-			<a asp-controller="Identity" asp-action="Roles" class="btn btn-lg btn-block btn-outline-primary">@Localizer["ButtonManage"]</a>
-		</div>
-	</div>
+    <!-- Persisted Grants -->
+    <div class="card mb-4 box-shadow">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">@Localizer["ButtonPersistedGrants"]</h4>
+        </div>
+        <div class="card-body">
+            <h1 class="card-title">
+                <span class="oi oi-key" title="Persisted Grants" aria-hidden="true"></span>
+            </h1>
+            <a asp-controller="Grant" asp-action="PersistedGrants" class="btn btn-lg btn-block btn-outline-primary">@Localizer["ButtonManage"]</a>
+        </div>
+    </div>
+    <!-- Users -->
+    <div class="card mb-4 box-shadow">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">@Localizer["ButtonUsers"]</h4>
+        </div>
+        <div class="card-body">
+            <h1 class="card-title">
+                <span class="oi oi-person" title="Users" aria-hidden="true"></span>
+            </h1>
+            <a asp-controller="Identity" asp-action="Users" class="btn btn-lg btn-block btn-primary">@Localizer["ButtonManage"]</a>
+        </div>
+    </div>
+    <!-- Roles -->
+    <div class="card mb-4 box-shadow">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">@Localizer["ButtonRoles"]</h4>
+        </div>
+        <div class="card-body">
+            <h1 class="card-title">
+                <span class="oi oi-lock-locked" title="Roles" aria-hidden="true"></span>
+            </h1>
+            <a asp-controller="Identity" asp-action="Roles" class="btn btn-lg btn-block btn-outline-primary">@Localizer["ButtonManage"]</a>
+        </div>
+    </div>
+    <!-- Organizations -->
+    <div class="card mb-4 box-shadow">
+        <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Organizations</h4>
+        </div>
+        <div class="card-body">
+            <h1 class="card-title">
+                <span class="oi oi-briefcase" title="Organizations" aria-hidden="true"></span>
+            </h1>
+            <a asp-controller="Identity" asp-action="Organizations" class="btn btn-lg btn-block btn-outline-primary">@Localizer["ButtonManage"]</a>
+        </div>
+    </div>
 </div>

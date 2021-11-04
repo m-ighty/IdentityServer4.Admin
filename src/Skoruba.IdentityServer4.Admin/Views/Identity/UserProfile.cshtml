@@ -158,6 +158,16 @@
                         </div>
                     </div>
 
+                    <!-- Organization -->
+                    <div class="form-group row">
+                        <label asp-for="OrganizationId" class="col-sm-3 col-form-label">
+                            Organization
+                        </label>
+                        <div class="col-sm-9">
+                            <select asp-for="OrganizationId" asp-items="@(new SelectList(Model.OrganizationList, "Id", "Text"))" class="form-control single-select"></select>
+                        </div>
+                    </div>
+
                     <!--Button-->
                     <div class="form-group row">
                         <label class="col-sm-3 col-form-label">

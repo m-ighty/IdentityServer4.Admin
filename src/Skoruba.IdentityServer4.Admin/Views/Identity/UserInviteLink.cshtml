@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
-@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces.IUserInviteLinkDto
+@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.UserInviteLinkDto
 @inject IViewLocalizer Localizer
 
 @{
@@ -11,12 +11,54 @@
     <div class="col-12">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Users">@Localizer["NavigationUsers"]</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Users">Users</a></li>
             </ol>
         </nav>
     </div>
 
     <div class="col-12">
-        <h2>@Localizer["PageTitle"]</h2>
+        <h2>Create user invite link</h2>
     </div>
 </div>
+
+<form id="client-form" asp-controller="Identity" asp-action="UserProfile" Method="post">
+
+    <div class="card mt-3">
+        <h5 class="card-header">Create user invite link</h5>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-10">
+                    <!-- Role -->
+                    <div class="form-group row">
+                        <label asp-for="RoleId" class="col-sm-3 col-form-label">
+                            Organization
+                        </label>
+                        <div class="col-sm-9">
+                            <select asp-for="RoleId" asp-items="@(new SelectList(Model.RoleList, "Id", "Text"))" class="form-control single-select"></select>
+                        </div>
+                    </div>
+
+                    <!-- Organization -->
+                    <div class="form-group row">
+                        <label asp-for="OrganizationId" class="col-sm-3 col-form-label">
+                            Organization
+                        </label>
+                        <div class="col-sm-9 d-flex flex-row">
+                            <select asp-for="OrganizationId" asp-items="@(new SelectList(Model.OrganizationList, "Id", "Text"))" class="form-control single-select"></select>
+                            <a asp-action="Organization" style="min-width: 240px;" class="btn btn-outline-primary d-block ml-2"><span class="oi oi-plus mr-2"></span>Create new Organization</a>
+                        </div>
+                    </div>
+
+                    <!--Button-->
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">
+                        </label>
+                        <div class="col-sm-9">
+                            <button type="submit" class="btn btn-primary">Create invite link</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

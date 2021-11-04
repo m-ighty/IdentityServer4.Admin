@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,10 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Int
 {
     public interface IUserInviteLinkDto
     {
-        public int? RoleId { get; set; }
-        public int? OrganizationId { get; set; }
+        List<SelectItemDto> RoleList { get; set; }
+        string RoleId { get; set; }
+
+        List<SelectItemDto> OrganizationList { get; set; }
+        string OrganizationId { get; set; }
     }
 }

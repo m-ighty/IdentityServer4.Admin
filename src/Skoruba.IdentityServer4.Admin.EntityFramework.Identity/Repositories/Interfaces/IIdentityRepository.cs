@@ -28,7 +28,7 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Identity.Repositories.In
 
         Task<PagedList<TRole>> GetRolesAsync(string search, int page = 1, int pageSize = 10);
 
-        Task<PagedList<dynamic>> GetOrganizationsAsync(string search, int page = 1, int pageSize = 10);
+        //Task<PagedList<dynamic>> GetOrganizationsAsync(string search, int page = 1, int pageSize = 10);
 
         Task<(IdentityResult identityResult, TKey roleId)> CreateRoleAsync(TRole role);
 

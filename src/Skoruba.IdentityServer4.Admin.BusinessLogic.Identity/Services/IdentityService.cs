@@ -121,23 +121,23 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Services
             return rolesDto;
         }
 
-        public virtual async Task<OrganizationsDto> GetOrganizationsAsync(string search, int page = 1, int pageSize = 10)
-        {
-            PagedList<dynamic> pagedList = await IdentityRepository.GetOrganizationsAsync(search, page, pageSize);
-            var organizationsDto = Mapper.Map<OrganizationsDto>(pagedList);
+        //public virtual async Task<OrganizationsDto> GetOrganizationsAsync(string search, int page = 1, int pageSize = 10)
+        //{
+        //    PagedList<dynamic> pagedList = await IdentityRepository.GetOrganizationsAsync(search, page, pageSize);
+        //    var organizationsDto = Mapper.Map<OrganizationsDto>(pagedList);
 
-            //var organizationsDto = new OrganizationsDto();
-            //organizationsDto.TotalCount = pagedList.TotalCount;
-            //organizationsDto.PageSize = pagedList.PageSize;
-            //foreach (var organization in pagedList.Data)
-            //{
-            //    organizationsDto.Organizations.Add(new OrganizationDto() { Id = organization.Id, Name = organization.Name });
-            //}
+        //    //var organizationsDto = new OrganizationsDto();
+        //    //organizationsDto.TotalCount = pagedList.TotalCount;
+        //    //organizationsDto.PageSize = pagedList.PageSize;
+        //    //foreach (var organization in pagedList.Data)
+        //    //{
+        //    //    organizationsDto.Organizations.Add(new OrganizationDto() { Id = organization.Id, Name = organization.Name });
+        //    //}
 
-            //await AuditEventLogger.LogEventAsync(new RolesRequestedEvent<TRolesDto>(organizationsDto)); // TODO: Add organization auditEvent
+        //    //await AuditEventLogger.LogEventAsync(new RolesRequestedEvent<TRolesDto>(organizationsDto)); // TODO: Add organization auditEvent
 
-            return organizationsDto;
-        }
+        //    return organizationsDto;
+        //}
 
         public virtual async Task<(IdentityResult identityResult, TKey roleId)> CreateRoleAsync(TRoleDto role)
         {

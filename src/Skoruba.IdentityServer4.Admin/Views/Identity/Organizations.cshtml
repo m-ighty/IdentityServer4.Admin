@@ -8,7 +8,7 @@
     Layout = "_Layout";
 }
 
-<h2>@Localizer["PageTitle"]</h2>
+<h2>Organizations</h2>
 
 <a asp-action="Organization" class="btn btn-outline-primary mb-3 mt-3"><span class="oi oi-plus"></span> Add Organization</a>
 
@@ -19,7 +19,7 @@
                 <thead>
                     <tr>
                         <th></th>
-                        <th>@Localizer["TableName"]</th>
+                        <th>Name</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -28,7 +28,7 @@
                     {
                         <tr>
                             <th>
-                                <a class="btn btn-primary" asp-action="Organization" asp-route-id="@organization.Id">@Localizer["TableButtonEdit"]</a>
+                                <a class="btn btn-primary" asp-action="Organization" asp-route-id="@organization.Id">Edit</a>
                             </th>
                             <td>@organization.Name</td>
                             <td>

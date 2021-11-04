@@ -6,11 +6,15 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Services.Interfaces;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common;
 using Skoruba.IdentityServer4.Admin.Configuration.Constants;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Extensions.Extensions;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
 using Skoruba.IdentityServer4.Admin.ExceptionHandling;
 using Skoruba.IdentityServer4.Admin.Helpers.Localization;
 
@@ -48,6 +52,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         private readonly IGenericControllerLocalizer<IdentityController<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
             TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
             TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> _localizer;
+        private readonly AdminIdentityDbContext _adminIdentityDbContext;
 
         public IdentityController(IIdentityService<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
                 TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
@@ -55,20 +60,107 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             ILogger<ConfigurationController> logger,
             IGenericControllerLocalizer<IdentityController<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
                 TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
-                TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> localizer) : base(logger)
+                TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> localizer,
+            AdminIdentityDbContext adminIdentityDbContext) : base(logger)
         {
             _identityService = identityService;
             _localizer = localizer;
+            _adminIdentityDbContext = adminIdentityDbContext;
         }
 
+        #region Organization
         [HttpGet]
         public async Task<IActionResult> Organizations(int? page, string search)
         {
             ViewBag.Search = search;
-            var organizations = await _identityService.GetOrganizationsAsync(search, page ?? 1);
+            page = page ?? 1;
+            var organizations = await _adminIdentityDbContext.Organizations.PageBy(x => x.Id, page.Value, 10).ToListAsync();
 
-            return View(organizations);
+            // TODO: Use automapper
+            var result = new OrganizationsDto()
+            {
+                PageSize = 10,
+                TotalCount = _adminIdentityDbContext.Organizations.Count(),
+                Organizations = organizations.Select(o => new OrganizationDto(o.Id, o.Name)).ToList()
+            };
+
+            return View(result);
         }
+
+        [HttpGet]
+        [Route("[controller]/[action]")]
+        [Route("[controller]/[action]/{id}")]
+        public async Task<IActionResult> Organization(int? id)
+        {
+            if (!id.HasValue)
+            {
+                return View(new OrganizationDto());
+            }
+
+            var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
+            if (organization == null) return NotFound();
+
+            var result = new OrganizationDto(organization.Id, organization.Name);
+
+            return View(result);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Organization(OrganizationDto organization)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(organization);
+            }
+
+            int organizationId;
+            Organization newOrganization = new Organization();
+
+            if (!organization.Id.HasValue)
+            {
+                newOrganization = new Organization(organization.Name);
+                await _adminIdentityDbContext.Organizations.AddAsync(newOrganization);
+            }
+            else
+            {
+                var existingOrganization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
+                existingOrganization.UpdateName(organization.Name);
+            }
+
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            organizationId = organization.Id.HasValue ? organization.Id.Value : newOrganization.Id;
+
+            SuccessNotification($"Organization '{organization.Name}' created successfully", "Success" );
+
+            return RedirectToAction(nameof(Organization), new { Id = organizationId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrganizationDelete(int id)
+        {
+            var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
+            if (organization == null) return NotFound();
+
+            var result = new OrganizationDto(organization.Id, organization.Name);
+
+            return View(result);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrganizationDelete(OrganizationDto organization)
+        {
+            var organizationToRemove = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
+            _adminIdentityDbContext.Organizations.Remove(organizationToRemove);
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            SuccessNotification("Organization is successfully deleted!", "Success");
+
+            return RedirectToAction(nameof(Organizations));
+        }
+        #endregion
 
         [HttpGet]
         public async Task<IActionResult> Roles(int? page, string search)
@@ -170,9 +262,11 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult UserProfile()
+        public async Task<IActionResult> UserProfile()
         {
             var newUser = new TUserDto();
+            newUser.OrganizationList = await GetOrganizationList();
+
 
             return View("UserProfile", newUser);
         }
@@ -183,14 +277,17 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         {
             var user = await _identityService.GetUserAsync(id.ToString());
             if (user == null) return NotFound();
+            user.OrganizationList = await GetOrganizationList();
 
             return View("UserProfile", user);
         }
 
         [HttpGet]
-        public IActionResult UserInviteLink()
+        public async Task<IActionResult> UserInviteLink()
         {
             var newUserInviteLink = new UserInviteLinkDto();
+            newUserInviteLink.OrganizationList = await GetOrganizationList();
+            newUserInviteLink.RoleList = await GetRoleList();
 
             return View("UserInviteLink", newUserInviteLink);
         }
@@ -460,6 +557,16 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             if (user == null) return NotFound();
 
             return View(user);
+        }
+
+        private async Task<List<SelectItemDto>> GetOrganizationList()
+        {
+            return await _adminIdentityDbContext.Organizations.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
+        }
+
+        private async Task<List<SelectItemDto>> GetRoleList()
+        {
+            return await _adminIdentityDbContext.Roles.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
         }
     }
 }
