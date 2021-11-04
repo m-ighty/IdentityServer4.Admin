@@ -40,6 +40,15 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
             builder.Entity<UserInvitation>().HasKey(o => o.Id);
             builder.Entity<UserInvitation>().Property(o => o.Id).ValueGeneratedOnAdd().IsRequired();
 
+            builder.Entity<UserInvitation>().HasOne(ui => ui.Organization)
+                .WithMany()
+                .HasForeignKey(ui => ui.OrganizationId);
+
+            builder.Entity<UserInvitation>().HasOne(ui => ui.Role)
+                .WithMany()
+                .HasForeignKey(ui => ui.RoleId);
+
+            builder.Entity<UserInvitation>().ToTable(TableConsts.UserInvitations);
         }
 
         private void ConfigureOrganizationContext(ModelBuilder builder)

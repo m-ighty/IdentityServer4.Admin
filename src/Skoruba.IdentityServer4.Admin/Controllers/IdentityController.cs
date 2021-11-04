@@ -12,8 +12,10 @@ using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Services.Interfaces;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common;
 using Skoruba.IdentityServer4.Admin.Configuration.Constants;
+using Skoruba.IdentityServer4.Admin.Configuration.Interfaces;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Extensions.Extensions;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
 using Skoruba.IdentityServer4.Admin.ExceptionHandling;
 using Skoruba.IdentityServer4.Admin.Helpers.Localization;
@@ -53,6 +55,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
             TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> _localizer;
         private readonly AdminIdentityDbContext _adminIdentityDbContext;
+        private readonly IRootConfiguration _configuration;
 
         public IdentityController(IIdentityService<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
                 TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
@@ -61,11 +64,12 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             IGenericControllerLocalizer<IdentityController<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
                 TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
                 TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> localizer,
-            AdminIdentityDbContext adminIdentityDbContext) : base(logger)
+            AdminIdentityDbContext adminIdentityDbContext, IRootConfiguration configuration) : base(logger)
         {
             _identityService = identityService;
             _localizer = localizer;
             _adminIdentityDbContext = adminIdentityDbContext;
+            _configuration = configuration;
         }
 
         #region Organization
@@ -159,6 +163,37 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             SuccessNotification("Organization is successfully deleted!", "Success");
 
             return RedirectToAction(nameof(Organizations));
+        }
+        #endregion
+
+        #region UserInviteLink
+        [HttpGet]
+        public async Task<IActionResult> UserInviteLink()
+        {
+            var newUserInviteLink = new UserInviteLinkDto();
+            newUserInviteLink.OrganizationList = await GetOrganizationList();
+            newUserInviteLink.RoleList = await GetRoleList();
+
+            return View(newUserInviteLink);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserInviteLink(UserInviteLinkDto userInvite)
+        {
+            var userInvitation = new UserInvitation(userInvite.RoleId, Int32.Parse(userInvite.OrganizationId));
+            await _adminIdentityDbContext.UserInvitations.AddAsync(userInvitation);
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            var link = $"{_configuration.AdminConfiguration.IdentityServerBaseUrl}/Account/RegisterByInvitation?token={userInvitation.Id}";
+            ViewBag.Link = link;
+
+            SuccessNotification($"User invite link successfully created: {link}", "Success");
+
+            userInvite.OrganizationList = await GetOrganizationList();
+            userInvite.RoleList = await GetRoleList();
+
+            return View(userInvite);
         }
         #endregion
 
@@ -280,16 +315,6 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             user.OrganizationList = await GetOrganizationList();
 
             return View("UserProfile", user);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> UserInviteLink()
-        {
-            var newUserInviteLink = new UserInviteLinkDto();
-            newUserInviteLink.OrganizationList = await GetOrganizationList();
-            newUserInviteLink.RoleList = await GetRoleList();
-
-            return View("UserInviteLink", newUserInviteLink);
         }
 
         [HttpGet]

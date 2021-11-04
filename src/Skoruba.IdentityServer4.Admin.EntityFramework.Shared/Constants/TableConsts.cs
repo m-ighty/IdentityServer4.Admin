@@ -11,5 +11,6 @@
         public const string IdentityUserTokens = "UserTokens";
 
         public const string Organizations = "Organizations";
+        public const string UserInvitations = "UserInvitations";
     }
 }

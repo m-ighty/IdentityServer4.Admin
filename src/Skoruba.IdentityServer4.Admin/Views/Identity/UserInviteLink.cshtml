@@ -21,7 +21,7 @@
     </div>
 </div>
 
-<form id="client-form" asp-controller="Identity" asp-action="UserProfile" Method="post">
+<form id="client-form" asp-controller="Identity" asp-action="UserInviteLink" Method="post">
 
     <div class="card mt-3">
         <h5 class="card-header">Create user invite link</h5>
@@ -31,7 +31,7 @@
                     <!-- Role -->
                     <div class="form-group row">
                         <label asp-for="RoleId" class="col-sm-3 col-form-label">
-                            Organization
+                            Role
                         </label>
                         <div class="col-sm-9">
                             <select asp-for="RoleId" asp-items="@(new SelectList(Model.RoleList, "Id", "Text"))" class="form-control single-select"></select>
@@ -57,6 +57,13 @@
                             <button type="submit" class="btn btn-primary">Create invite link</button>
                         </div>
                     </div>
+
+                    @if (ViewBag.Link != null)
+                    {
+                        <div class="alert alert-success">
+                            @ViewBag.Link
+                        </div>
+                    }
                 </div>
             </div>
         </div>

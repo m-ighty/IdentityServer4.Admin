@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
@@ -50,6 +51,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         private readonly LoginConfiguration _loginConfiguration;
         private readonly RegisterConfiguration _registerConfiguration;
         private readonly IdentityOptions _identityOptions;
+        private readonly AdminIdentityDbContext _adminIdentityDbContext;
         private readonly ILogger<AccountController<TUser, TKey>> _logger;
 
         public AccountController(
@@ -65,6 +67,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             LoginConfiguration loginConfiguration,
             RegisterConfiguration registerConfiguration,
             IdentityOptions identityOptions,
+            AdminIdentityDbContext adminIdentityDbContext,
             ILogger<AccountController<TUser, TKey>> logger)
         {
             _userResolver = userResolver;
@@ -79,6 +82,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             _loginConfiguration = loginConfiguration;
             _registerConfiguration = registerConfiguration;
             _identityOptions = identityOptions;
+            _adminIdentityDbContext = adminIdentityDbContext;
             _logger = logger;
         }
 
@@ -571,6 +575,80 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             }
 
             ModelState.AddModelError(string.Empty, _localizer["InvalidAuthenticatorCode"]);
+
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult RegisterByInvitation([FromQuery] string token)
+        {
+            if (token.IsNullOrEmpty())
+                return NotFound();
+
+            var userInvitation = _adminIdentityDbContext.UserInvitations.FirstOrDefault(ui => ui.Id == Guid.Parse(token));
+
+            if(userInvitation == null)
+                return NotFound();
+
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterByInvitation(RegisterViewModel model, string returnUrl = null)
+        {
+            //returnUrl = returnUrl ?? Url.Content("~/");
+
+            //ViewData["ReturnUrl"] = returnUrl;
+
+            //if (!ModelState.IsValid) return View(model);
+
+            //var user = new TUser
+            //{
+            //    UserName = model.UserName,
+            //    Email = model.Email
+            //};
+
+            //var result = await _userManager.CreateAsync(user, model.Password);
+            //if (result.Succeeded)
+            //{
+            //    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            //    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            //    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code }, HttpContext.Request.Scheme);
+
+            //    await _emailSender.SendEmailAsync(model.Email, _localizer["ConfirmEmailTitle"], _localizer["ConfirmEmailBody", HtmlEncoder.Default.Encode(callbackUrl)]);
+
+            //    if (_identityOptions.SignIn.RequireConfirmedAccount)
+            //    {
+            //        return View("RegisterConfirmation");
+            //    }
+            //    else
+            //    {
+            //        await _signInManager.SignInAsync(user, isPersistent: false);
+            //        return LocalRedirect(returnUrl);
+            //    }
+            //}
+
+            //AddErrors(result);
+
+            //// If we got this far, something failed, redisplay form
+            //if (IsCalledFromRegisterWithoutUsername)
+            //{
+            //    var registerWithoutUsernameModel = new RegisterWithoutUsernameViewModel
+            //    {
+            //        Email = model.Email,
+            //        Password = model.Password,
+            //        ConfirmPassword = model.ConfirmPassword
+            //    };
+
+            //    return View("RegisterWithoutUsername", registerWithoutUsernameModel);
+            //}
+            //else
+            //{
+            //    return View(model);
+            //}
 
             return View(model);
         }
