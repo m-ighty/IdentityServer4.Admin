@@ -143,6 +143,22 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Identity.Repositories
             return pagedList;
         }
 
+        //public virtual async Task<PagedList<dynamic>> GetOrganizationsAsync(string search, int page = 1, int pageSize = 10)
+        //{
+        //    var pagedList = new PagedList<dynamic>();
+
+        //    //Expression<Func<TRole, bool>> searchCondition = x => x.Name.Contains(search);
+        //    //var roles = await RoleManager.Roles.WhereIf(!string.IsNullOrEmpty(search), searchCondition).PageBy(x => x.Id, page, pageSize).ToListAsync();
+        //    //pagedList.Data.AddRange(roles);
+
+        //    pagedList.Data.Add(new { Id = 1, Name = "Default" }); // TODO: Get organizations from DB!!!
+        //    //pagedList.TotalCount = await RoleManager.Roles.WhereIf(!string.IsNullOrEmpty(search), searchCondition).CountAsync();
+        //    pagedList.TotalCount = 1;
+        //    pagedList.PageSize = pageSize;
+
+        //    return pagedList;
+        //}
+
         public virtual Task<TRole> GetRoleAsync(TKey roleId)
         {
             return RoleManager.Roles.Where(x => x.Id.Equals(roleId)).SingleOrDefaultAsync();

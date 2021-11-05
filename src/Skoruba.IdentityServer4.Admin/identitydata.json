@@ -5,6 +5,29 @@
         "Name": "IdentityAdmin"
       }
     ],
+    "LindePdmtRoles": [
+      {
+        "Name": "Administrator"
+      },
+      {
+        "Name": "ItSupport"
+      },
+      {
+        "Name": "HospitalTeam"
+      },
+      {
+        "Name": "LindeReadOnly"
+      },
+      {
+        "Name": "HospitalReadOnly"
+      },
+      {
+        "Name": "Prescriber"
+      },
+      {
+        "Name": "LindeKeyUser"
+      }
+    ],
     "Users": [
       {
         "Username": "admin",

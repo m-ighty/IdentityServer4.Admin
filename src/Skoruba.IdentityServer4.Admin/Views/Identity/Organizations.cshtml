@@ -1,0 +1,49 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common
+@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces.IOrganizationsDto
+@inject IViewLocalizer Localizer
+
+@{
+    ViewBag.Title = Localizer["PageTitle"];
+    Layout = "_Layout";
+}
+
+<h2>Organizations</h2>
+
+<a asp-action="Organization" class="btn btn-outline-primary mb-3 mt-3"><span class="oi oi-plus"></span> Add Organization</a>
+
+<div class="row">
+    <div class="col-12">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var organization in Model.Organizations)
+                    {
+                        <tr>
+                            <th>
+                                <a class="btn btn-primary" asp-action="Organization" asp-route-id="@organization.Id">Edit</a>
+                            </th>
+                            <td>@organization.Name</td>
+                            <td>
+                                <a class="btn btn-danger" asp-action="OrganizationDelete" asp-route-id="@organization.Id"><span class="oi oi-x"></span></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        @await Html.PartialAsync("Common/Pager", new Pager { Action = "Organizations", PageSize = Model.PageSize, TotalCount = Model.TotalCount })
+    </div>
+</div>

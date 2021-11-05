@@ -76,6 +76,12 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Mappers
                 .ForMember(x => x.Roles,
                     opt => opt.MapFrom(src => src.Data));
 
+            //CreateMap<dynamic, OrganizationDto>(MemberList.Destination);
+            //    //.ForMember(dest => dest.Id, source => source.MapFrom(src => src.Id));
+
+            //CreateMap<PagedList<dynamic>, OrganizationsDto>(MemberList.Destination)
+            //    .ForMember(dest => dest.Organizations, src => src.MapFrom(src => src.Data));
+
             CreateMap<PagedList<TUserClaim>, TUserClaimsDto>(MemberList.Destination)
                 .ForMember(x => x.Claims,
                     opt => opt.MapFrom(src => src.Data));

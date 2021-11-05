@@ -23,12 +23,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
 using Skoruba.IdentityServer4.STS.Identity.Helpers.Localization;
 using Skoruba.IdentityServer4.STS.Identity.ViewModels.Account;
+using Skoruba.IdentityServer4.STS.Identity.ViewModels.Home;
 
 namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 {
@@ -50,6 +53,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         private readonly LoginConfiguration _loginConfiguration;
         private readonly RegisterConfiguration _registerConfiguration;
         private readonly IdentityOptions _identityOptions;
+        private readonly AdminIdentityDbContext _adminIdentityDbContext;
         private readonly ILogger<AccountController<TUser, TKey>> _logger;
 
         public AccountController(
@@ -65,6 +69,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             LoginConfiguration loginConfiguration,
             RegisterConfiguration registerConfiguration,
             IdentityOptions identityOptions,
+            AdminIdentityDbContext adminIdentityDbContext,
             ILogger<AccountController<TUser, TKey>> logger)
         {
             _userResolver = userResolver;
@@ -79,6 +84,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             _loginConfiguration = loginConfiguration;
             _registerConfiguration = registerConfiguration;
             _identityOptions = identityOptions;
+            _adminIdentityDbContext = adminIdentityDbContext;
             _logger = logger;
         }
 
@@ -572,6 +578,122 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 
             ModelState.AddModelError(string.Empty, _localizer["InvalidAuthenticatorCode"]);
 
+            return View(model);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterByInvitation(string token, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            var errorVm = new ErrorViewModel();
+
+            // Check if the token is a valid GUID
+            Guid guidToken;
+            if (token.IsNullOrEmpty() || !Guid.TryParse(token, out guidToken))
+            {
+                errorVm.Error = new ErrorMessage()
+                {
+                    Error = "Invalid invite token."
+                };
+
+                return View("Error", errorVm);
+            }
+
+            // Check if an invite exists with the given GUID
+            var userInvitation = await _adminIdentityDbContext.UserInvitations.FirstOrDefaultAsync(ui => ui.Id == Guid.Parse(token));
+            if(userInvitation == null)
+            {
+                errorVm.Error = new ErrorMessage()
+                {
+                    Error = "Invalid invite token."
+                };
+
+                return View("Error", errorVm);
+            }
+
+            // Check if the invite is not expired or already been used
+            if(DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used || (userInvitation.Visited != null && DateTime.UtcNow > userInvitation.Visited.Value.AddMinutes(5)))
+            {
+                errorVm.Error = new ErrorMessage()
+                {
+                    Error = "This Invite link has expired."
+                };
+
+                return View("Error", errorVm);
+            }
+
+            userInvitation.InvitationPageVisited();
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterByInvitation(RegisterViewModel model, string token, string returnUrl = null)
+        {
+            returnUrl = returnUrl ?? Url.Content("~/");
+            var errorVm = new ErrorViewModel();
+            ViewData["ReturnUrl"] = returnUrl;
+
+            if (!ModelState.IsValid) return View(model);
+
+            // Get userInvitation
+            var userInvitation = _adminIdentityDbContext.UserInvitations.FirstOrDefault(ui => ui.Id == Guid.Parse(token));
+
+            //Check if invite is (still) valid
+            if(DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used || (userInvitation.Visited != null && DateTime.UtcNow > userInvitation.Visited.Value.AddMinutes(5)))
+            {
+                errorVm.Error = new ErrorMessage()
+                {
+                    Error = "Registration failed, the Invite link has expired."
+                };
+
+                return View("Error", errorVm);
+            }
+
+            var user = new TUser
+            {
+                UserName = model.UserName,
+                Email = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                // Assign role:
+                var roleName = _adminIdentityDbContext.Roles.Where(r => r.Id == userInvitation.RoleId).Select(r => r.NormalizedName).FirstOrDefault();
+                if(roleName != null)
+                    await _userManager.AddToRoleAsync(user, roleName);
+
+                // Assign organization
+                //var u = _adminIdentityDbContext.Users.FirstOrDefault(u => u.Id == user.Id);
+
+                // Set the userInvite to USED:
+                userInvitation.InvitationIsUsed();
+
+                await _adminIdentityDbContext.SaveChangesAsync();
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code }, HttpContext.Request.Scheme);
+
+                await _emailSender.SendEmailAsync(model.Email, _localizer["ConfirmEmailTitle"], _localizer["ConfirmEmailBody", HtmlEncoder.Default.Encode(callbackUrl)]);
+
+                if (_identityOptions.SignIn.RequireConfirmedAccount)
+                {
+                    return View("RegisterConfirmation");
+                }
+                else
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return LocalRedirect(returnUrl);
+                }
+            }
+
+            AddErrors(result);
             return View(model);
         }
 

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 
 namespace Skoruba.IdentityServer4.Admin.EntityFramework.SqlServer.Migrations.Identity
 {
     [DbContext(typeof(AdminIdentityDbContext))]
-    partial class AdminIdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211103103953_AddedOrganization")]
+    partial class AddedOrganization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -220,39 +222,6 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.SqlServer.Migrations.Ide
                     b.ToTable("UserTokens");
                 });
 
-            modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity.UserInvitation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OrganizationId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("Used")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ValidTill")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("Visited")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("UserInvitations");
-                });
-
             modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.Organization", b =>
                 {
                     b.Property<int>("Id")
@@ -326,19 +295,6 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.SqlServer.Migrations.Ide
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity.UserInvitation", b =>
-                {
-                    b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity.UserIdentityRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId");
                 });
 #pragma warning restore 612, 618
         }

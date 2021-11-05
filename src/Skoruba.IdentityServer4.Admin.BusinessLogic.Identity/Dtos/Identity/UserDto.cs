@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Base;
 using Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces;
+using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common;
 
 namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
 {
@@ -28,5 +30,9 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
         public int AccessFailedCount { get; set; }
 
         public DateTimeOffset? LockoutEnd { get; set; }
+
+        public List<SelectItemDto> OrganizationList { get; set; }
+
+        public string OrganizationId { get; set; } // We later cast it back to int
     }
 }
