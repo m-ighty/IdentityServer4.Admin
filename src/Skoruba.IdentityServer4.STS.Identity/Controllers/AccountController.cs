@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
@@ -586,6 +587,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         public async Task<IActionResult> RegisterByInvitation(string token, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            ViewData["Token"] = token;
             var errorVm = new ErrorViewModel();
 
             // Check if the token is a valid GUID
@@ -613,7 +615,8 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             }
 
             // Check if the invite is not expired or already been used
-            if(DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used || (userInvitation.Visited != null && DateTime.UtcNow > userInvitation.Visited.Value.AddMinutes(5)))
+            // || (userInvitation.Visited != null && DateTime.UtcNow > userInvitation.Visited.Value.AddMinutes(5))
+            if (DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used)
             {
                 errorVm.Error = new ErrorMessage()
                 {
@@ -632,7 +635,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegisterByInvitation(RegisterViewModel model, string token, string returnUrl = null)
+        public async Task<IActionResult> RegisterByInvitation(RegisterByInvitationViewModel model, string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             var errorVm = new ErrorViewModel();
@@ -641,10 +644,10 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             if (!ModelState.IsValid) return View(model);
 
             // Get userInvitation
-            var userInvitation = _adminIdentityDbContext.UserInvitations.FirstOrDefault(ui => ui.Id == Guid.Parse(token));
+            var userInvitation = _adminIdentityDbContext.UserInvitations.FirstOrDefault(ui => ui.Id == Guid.Parse(model.Token));
 
             //Check if invite is (still) valid
-            if(DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used || (userInvitation.Visited != null && DateTime.UtcNow > userInvitation.Visited.Value.AddMinutes(5)))
+            if(userInvitation == null || DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used)
             {
                 errorVm.Error = new ErrorMessage()
                 {
@@ -660,6 +663,9 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 Email = model.Email
             };
 
+            // Assign Organization:
+            (user as UserIdentity).OrganizationId = userInvitation.OrganizationId;
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -668,12 +674,8 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 if(roleName != null)
                     await _userManager.AddToRoleAsync(user, roleName);
 
-                // Assign organization
-                //var u = _adminIdentityDbContext.Users.FirstOrDefault(u => u.Id == user.Id);
-
                 // Set the userInvite to USED:
                 userInvitation.InvitationIsUsed();
-
                 await _adminIdentityDbContext.SaveChangesAsync();
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
