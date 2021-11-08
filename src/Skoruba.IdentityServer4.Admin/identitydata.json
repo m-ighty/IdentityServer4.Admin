@@ -2,7 +2,7 @@
   "IdentityData": {
     "Roles": [
       {
-        "Name": "IdentityAdmin"
+        "Name": "SkorubaIdentityAdminAdministrator"
       }
     ],
     "LindePdmtRoles": [
@@ -31,10 +31,10 @@
     "Users": [
       {
         "Username": "admin",
-        "Password": "M-ighty123",
-        "Email": "lieven@m-ighty.com",
+        "Password": "Pa$$word123",
+        "Email": "admin@skoruba.com",
         "Roles": [
-          "IdentityAdmin"
+          "SkorubaIdentityAdminAdministrator"
         ],
         "Claims": [
           {

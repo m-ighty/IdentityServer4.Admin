@@ -62,46 +62,22 @@
             }
         ],
         "ApiResources": [
-          {
-            "Name": "mighty_identity_admin_api",
-            "Scopes": [
-              {
-                "Name": "mighty_identity_admin_api",
-                "DisplayName": "mighty_identity_admin_api",
-                "Required": true,
-                "UserClaims": [
-                  "role",
-                  "name"
+            {
+                "Name": "skoruba_identity_admin_api",
+                "Scopes": [
+                    {
+                        "Name": "skoruba_identity_admin_api",
+                        "DisplayName": "skoruba_identity_admin_api",
+                        "Required": true,
+                        "UserClaims": [
+                            "role",
+                            "name"
+                        ]
+                    }
                 ]
-              }
-            ]
-          },
-          {
-            "Name": "lindeapi",
-            "Scopes": [
-              {
-                "Name": "lindeapi",
-                "DisplayName": "Linde PDMT api",
-                "Required": true,
-                "UserClaims": [
-                  "role",
-                  "name"
-                ]
-              }
-            ]
-          }
+            }
         ],
-      "Clients": [
-        {
-          "ClientId": "linde-pdmt-local",
-          "ClientName": "linde-pdmt-local",
-          "ClientUri": "http://localhost:52930",
-          "AllowedGrantTypes": [
-            "authorization_code",
-            "code"
-          ],
-          "RequirePkce": true,
-          "ClientSecrets": [
+        "Clients": [
             {
                 "ClientId": "skoruba_identity_admin",
                 "ClientName": "skoruba_identity_admin",
@@ -152,42 +128,6 @@
                 "http://localhost:52930"
               ]
             }
-          ],
-          "RedirectUris": [
-            "https://localhost:44303/signin-oidc"
-          ],
-          "FrontChannelLogoutUri": "https://localhost:44303/signout-oidc",
-          "PostLogoutRedirectUris": [
-            "https://localhost:44303/signout-callback-oidc"
-          ],
-          "AllowedCorsOrigins": [
-            "https://localhost:44303"
-          ],
-          "AllowedScopes": [
-            "openid",
-            "email",
-            "profile",
-            "roles"
-          ]
-        },
-        {
-          "ClientId": "mighty_identity_admin_api_swaggerui",
-          "ClientName": "mighty_identity_admin_api_swaggerui",
-          "AllowedGrantTypes": [
-            "authorization_code"
-          ],
-          "RequireClientSecret": false,
-          "RequirePkce": true,
-          "RedirectUris": [
-            "https://localhost:44302/swagger/oauth2-redirect.html"
-          ],
-          "AllowedScopes": [
-            "mighty_identity_admin_api"
-          ],
-          "AllowedCorsOrigins": [
-            "https://localhost:44302"
-          ]
-        }
-      ]
+        ]
     }
 }
