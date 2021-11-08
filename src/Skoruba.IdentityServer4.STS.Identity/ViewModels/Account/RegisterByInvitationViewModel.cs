@@ -18,5 +18,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.ViewModels.Account
         [DataType(DataType.Password)]
         [Compare("Password")]
         public string ConfirmPassword { get; set; }
+
+        public string Token { get; set; }
     }
 }

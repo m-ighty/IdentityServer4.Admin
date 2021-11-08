@@ -183,8 +183,10 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                     {
                         UserName = user.Username,
                         Email = user.Email,
-                        EmailConfirmed = true
+                        EmailConfirmed = true,
                     };
+
+                    (identityUser as EntityFramework.Shared.Entities.Identity.UserIdentity).OrganizationId = 1;
 
                     // if there is no password we create user without password
                     // user can reset password later, because accounts have EmailConfirmed set to true
