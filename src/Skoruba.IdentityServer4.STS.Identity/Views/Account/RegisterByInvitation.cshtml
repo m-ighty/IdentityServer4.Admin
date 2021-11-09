@@ -1,52 +1,47 @@
 ﻿@inject IViewLocalizer Localizer
 @using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces
 @model Skoruba.IdentityServer4.STS.Identity.ViewModels.Account.RegisterByInvitationViewModel
+@inject IRootConfiguration RootConfiguration
+
 @{
     ViewData["Title"] = Localizer["Title"];
+    Layout = "_LayoutLogin";
 }
 
-<h2>Register</h2>
-
-@await Html.PartialAsync("_ValidationSummary")
-
-<form asp-controller="Account" asp-action="RegisterByInvitation" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-    <h4>Create a new account.</h4>
-    <hr />
-    <div class="form-group">
-        <label asp-for="UserName" class="col-md-2 control-label">@Localizer["UserName"]</label>
-        <div class="col-md-10">
-            <input asp-for="UserName" class="form-control" />
-            <span asp-validation-for="UserName" class="text-danger"></span>
+<div class="c-login">
+    <div class="c-login__form">
+        <div class="c-login__header">
+            <h1>@RootConfiguration.AdminConfiguration.PageTitle</h1>
+            <div class="c-sub">Register</div>
+        </div>
+        <div class="c-login__body">
+            @if (!ViewContext.ModelState.IsValid)
+            {
+                <div asp-validation-summary="All" class="c-validation-errors"></div>
+            }
+            <form id="register-form" asp-controller="Account" asp-action="RegisterByInvitation" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+                <div class="c-form-group">
+                    <label asp-for="UserName">@Localizer["UserName"]</label>
+                    <input asp-for="UserName" placeholder="@Localizer["UserName"]" />
+                </div>
+                <div class="c-form-group">
+                    <label asp-for="Email">@Localizer["Email"]</label>
+                    <input asp-for="Email" placeholder="@Localizer["Email"]" />
+                </div>
+                <div class="c-form-group">
+                    <label asp-for="Password">@Localizer["Password"]</label>
+                    <input asp-for="Password" placeholder="@Localizer["Password"]" />
+                </div>
+                <div class="c-form-group">
+                    <label asp-for="ConfirmPassword">@Localizer["ConfirmPassword"]</label>
+                    <input asp-for="ConfirmPassword" placeholder="@Localizer["ConfirmPassword"]" />
+                </div>
+                <input type="hidden" asp-for="Token" value="@ViewData["Token"]" />
+            </form>
+        </div>
+        <div class="c-login__footer">
+            <button type="submit" form="register-form" class="c-button">@Localizer["Register"]</button>
         </div>
     </div>
-    <div class="form-group">
-        <label asp-for="Email" class="col-md-2 control-label">@Localizer["Email"]</label>
-        <div class="col-md-10">
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-    </div>
-    <div class="form-group">
-        <label asp-for="Password" class="col-md-2 control-label">@Localizer["Password"]</label>
-        <div class="col-md-10">
-            <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password" class="text-danger"></span>
-        </div>
-    </div>
-    <div class="form-group">
-        <label asp-for="ConfirmPassword" class="col-md-2 control-label">@Localizer["ConfirmPassword"]</label>
-        <div class="col-md-10">
-            <input asp-for="ConfirmPassword" class="form-control" />
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-        </div>
-    </div>
-
-    <input type="hidden" asp-for="Token" value="@ViewData["Token"]" />
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-primary">Register</button>
-        </div>
-    </div>
-
-</form>
+</div>
