@@ -104,7 +104,16 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
 
-            var result = new OrganizationDto(organization.Id, organization.Name);
+            var organizationTreatmentTypes = new List<OrganizationTreatmentTypeDto>()
+            {
+                new OrganizationTreatmentTypeDto()
+                {
+                    Name = "CPAP",
+                    Value = "4512457895"
+                }
+            }; // TODO: get from DB
+            
+            var result = new OrganizationDto(organization.Id, organization.Name, await GetTreatmentTypesList(), organizationTreatmentTypes);
 
             return View(result);
         }
@@ -138,6 +147,12 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             SuccessNotification($"Organization '{organization.Name}' created successfully", "Success" );
 
+            return RedirectToAction(nameof(Organization), new { Id = organizationId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AddOrganizationTreatmentType(int treatmentTypeId, int organizationId)
+        {
             return RedirectToAction(nameof(Organization), new { Id = organizationId });
         }
 
@@ -592,6 +607,11 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         private async Task<List<SelectItemDto>> GetRoleList()
         {
             return await _adminIdentityDbContext.Roles.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
+        }
+
+        private async Task<List<SelectItemDto>> GetTreatmentTypesList()
+        {
+            return await _adminIdentityDbContext.TreatmentTypes.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel;
@@ -13,6 +14,9 @@ using Skoruba.AuditLogging.EntityFramework.Entities;
 using Skoruba.IdentityServer4.Admin.Configuration;
 using Skoruba.IdentityServer4.Admin.Configuration.Interfaces;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Interfaces;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Constants;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
 
 namespace Skoruba.IdentityServer4.Admin.Helpers
 {
@@ -52,7 +56,7 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 if ((seedConfiguration != null && seedConfiguration.ApplySeed) 
                     || (applyDbMigrationWithDataSeedFromProgramArguments))
                 {
-                    await EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(services);
+                    await EnsureSeedDataAsync<TIdentityDbContext, TIdentityServerDbContext, TUser, TRole>(services);
                 }
             }
         }
@@ -99,7 +103,7 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
             }
         }
 
-        public static async Task EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(IServiceProvider serviceProvider)
+        public static async Task EnsureSeedDataAsync<TIdentityDbContext, TIdentityServerDbContext, TUser, TRole>(IServiceProvider serviceProvider)
         where TIdentityServerDbContext : DbContext, IAdminConfigurationDbContext
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
@@ -107,12 +111,14 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
             using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<TIdentityServerDbContext>();
+                var adminContext = scope.ServiceProvider.GetRequiredService<TIdentityDbContext>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<TUser>>();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<TRole>>();
                 var rootConfiguration = scope.ServiceProvider.GetRequiredService<IRootConfiguration>();
 
                 await EnsureSeedIdentityServerData(context, rootConfiguration.IdentityServerDataConfiguration);
                 await EnsureSeedIdentityData(userManager, roleManager, rootConfiguration.IdentityDataConfiguration);
+                await EnsureSeedOrganizationData(adminContext as AdminIdentityDbContext);
             }
         }
 
@@ -257,6 +263,24 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                     await context.Clients.AddAsync(client.ToEntity());
                 }
 
+                await context.SaveChangesAsync();
+            }
+        }
+    
+        private static async Task EnsureSeedOrganizationData(AdminIdentityDbContext context)
+        {
+            // Seed TreatmentTypes:
+            if (!context.TreatmentTypes.Any())
+            {
+                var treatmentTypes = new List<TreatmentType>()
+                {
+                    new TreatmentType(TreatmentTypes.Cpap),
+                    new TreatmentType(TreatmentTypes.Mra),
+                    new TreatmentType(TreatmentTypes.Oxygen),
+                    new TreatmentType(TreatmentTypes.Nutrition)
+                };
+
+                await context.TreatmentTypes.AddRangeAsync(treatmentTypes);
                 await context.SaveChangesAsync();
             }
         }

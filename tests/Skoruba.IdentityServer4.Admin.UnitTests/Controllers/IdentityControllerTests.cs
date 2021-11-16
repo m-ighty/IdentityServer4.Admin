@@ -30,6 +30,7 @@ using Skoruba.IdentityServer4.Admin.Helpers;
 using Skoruba.IdentityServer4.Admin.Helpers.Localization;
 using Xunit;
 using System.Security.Claims;
+using Skoruba.IdentityServer4.Admin.Configuration.Interfaces;
 
 namespace Skoruba.IdentityServer4.Admin.UnitTests.Controllers
 {
@@ -567,6 +568,7 @@ namespace Skoruba.IdentityServer4.Admin.UnitTests.Controllers
             var tempDataDictionaryFactory = serviceProvider.GetRequiredService<ITempDataDictionaryFactory>();
             var identityService = GetIdentityService(serviceProvider);
             var dbContext = serviceProvider.GetRequiredService<AdminIdentityDbContext>();
+            IRootConfiguration rootConfiguration = serviceProvider.GetRequiredService<IRootConfiguration>();
 
             //Get Controller
             var controller = new IdentityController<UserDto<string>, RoleDto<string>,
@@ -574,7 +576,7 @@ namespace Skoruba.IdentityServer4.Admin.UnitTests.Controllers
                 UserIdentityUserLogin, UserIdentityRoleClaim, UserIdentityUserToken,
                 UsersDto<UserDto<string>, string>, RolesDto<RoleDto<string>, string>, UserRolesDto<RoleDto<string>, string>,
                 UserClaimsDto<UserClaimDto<string>, string>, UserProviderDto<string>, UserProvidersDto<UserProviderDto<string>, string>, UserChangePasswordDto<string>,
-                RoleClaimsDto<RoleClaimDto<string>, string>, UserClaimDto<string>, RoleClaimDto<string>>(identityService, logger, localizer, dbContext);
+                RoleClaimsDto<RoleClaimDto<string>, string>, UserClaimDto<string>, RoleClaimDto<string>>(identityService, logger, localizer, dbContext, rootConfiguration);
 
             //Setup TempData for notification in basecontroller
             var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext;

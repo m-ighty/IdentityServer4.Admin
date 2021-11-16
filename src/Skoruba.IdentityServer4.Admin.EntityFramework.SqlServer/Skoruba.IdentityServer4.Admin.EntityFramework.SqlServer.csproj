@@ -11,6 +11,11 @@
       <PackageIconUrl>https://raw.githubusercontent.com/skoruba/IdentityServer4.Admin/master/docs/Images/Skoruba.IdentityServer4.Admin-Logo-Nuget.png</PackageIconUrl>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Migrations\Identity\20211116094117_AddedTreatmentTypes.cs" />
+    <Compile Remove="Migrations\Identity\20211116094117_AddedTreatmentTypes.Designer.cs" />
+  </ItemGroup>
+
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.6" />
         <PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="3.1.1" />
