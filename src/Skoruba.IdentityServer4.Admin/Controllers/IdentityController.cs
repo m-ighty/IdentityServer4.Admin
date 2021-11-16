@@ -103,17 +103,8 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
-
-            var organizationTreatmentTypes = new List<OrganizationTreatmentTypeDto>()
-            {
-                new OrganizationTreatmentTypeDto()
-                {
-                    Name = "CPAP",
-                    Value = "4512457895"
-                }
-            }; // TODO: get from DB
             
-            var result = new OrganizationDto(organization.Id, organization.Name, await GetTreatmentTypesList(), organizationTreatmentTypes);
+            var result = new OrganizationDto(organization.Id, organization.Name);
 
             return View(result);
         }
@@ -150,12 +141,30 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             return RedirectToAction(nameof(Organization), new { Id = organizationId });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> AddOrganizationTreatmentType(int treatmentTypeId, int organizationId)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddOrganizationTreatmentType(OrganizationTreatmentTypeDto model)
         {
-            return RedirectToAction(nameof(Organization), new { Id = organizationId });
+            // TODO: Waarde komt door, nu alleen nog opslaan:
+
+
+            return RedirectToAction(nameof(Organization), new { Id = model.OrganizationId });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> OrganizationTreatmentTypes(int id)
+        {
+            var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
+            if (organization == null) return NotFound();
+
+            // TODO form DB:
+            var selectedList = new List<TreatmentTypeDto>() { new TreatmentTypeDto() { Name = "MRA", TreatmentTypeId = 1, Value = "265525565268" } };
+
+            var result = new OrganizationTreatmentTypeDto(organization.Id, organization.Name, selectedList, await GetTreatmentTypesList());
+
+            return View(result);
+        }
+        
         [HttpGet]
         public async Task<IActionResult> OrganizationDelete(int id)
         {

@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common
+@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.OrganizationTreatmentTypeDto
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Organizations">Organizations</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Organization" asp-route-id="@Model.OrganizationId">@Model.OrganizationName</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Treatment Types</li>
+            </ol>
+        </nav>
+    </div>
+
+
+    <div class="col-12">
+        <h2>Organization Treatment Types</h2>
+    </div>
+</div>
+
+<form id="client-form" asp-controller="Identity" asp-action="AddOrganizationTreatmentType" Method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-row">
+                <select asp-for="NewTreatmentTypeId" asp-items="@(new SelectList(Model.TreatmentTypesList, "Id", "Text"))" class="form-control single-select"></select>
+                <input type="text" required class="form-control" asp-for="NewTreatmentTypeValue">
+                <button type="submit" class="btn btn-primary"><span class="oi oi-plus mr-2"></span> Add Treatment Type</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<ul>
+    @foreach (var item in Model.TreatmentTypes)
+    {
+        <li>@item.Name : @item.Value</li>
+    }
+</ul>

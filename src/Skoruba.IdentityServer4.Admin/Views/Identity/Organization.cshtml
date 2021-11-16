@@ -32,6 +32,7 @@
         <!--Button-->
         <div class="form-group row">
             <div class="col-sm-12">
+                <a asp-action="OrganizationTreatmentTypes" asp-route-id="@Model.Id" class="btn btn-outline-primary">Manage Treatment Types</a>
                 <a asp-action="OrganizationDelete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Organization</a>
             </div>
         </div>
@@ -51,35 +52,6 @@
                 <div class="col-sm-9">
                     <input type="text" required class="form-control" asp-for="Name">
                     <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label class="col-sm-3 col-form-label">
-                    Treatment Types
-                </label>
-                <div class="col-sm-9">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex flex-row">
-                                    <select asp-for="CurrentSelectedTreatmentTypeId" asp-items="@(new SelectList(Model.TreatmentTypesList, "Id", "Text"))" class="form-control single-select"></select>
-                                    <a asp-action="AddOrganizationTreatmentType" asp-route-organizationId="@Model.Id" asp-route-treatmentTypeId="@Model.CurrentSelectedTreatmentTypeId" style="min-width: 120px;" class="btn btn-outline-primary d-block ml-2"><span class="oi oi-plus mr-2"></span>Add</a>
-                            </div>
-                            <hr />
-                            <p>Selected Organization treatment types:</p>
-                            <div class="row">
-                                @for (int i = 0; i < Model.OrganizationTreatmentTypes.Count(); i++)
-                                {
-                                    <div class="col-sm-3">
-                                        <strong>@Model.OrganizationTreatmentTypes[0].Name: </strong>
-                                    </div>
-                                    <div class="col-sm-9">
-                                        <input type="text" required class="form-control" asp-for="OrganizationTreatmentTypes[i].Value">
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
