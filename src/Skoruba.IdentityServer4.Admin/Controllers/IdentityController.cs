@@ -164,15 +164,15 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateOrganizationTreatmentType(OrganizationTreatmentTypeDto model)
         {
-            // If treatmentType already exists for this organization:
-            var alreadyExists = await _adminIdentityDbContext.OrganizationTreatmentTypes
-                .AnyAsync(ott => model.TreatmentTypes.Select(tt => tt.Value).Contains(ott.OrganizationCode));
+            //// If treatmentType already exists for this organization:
+            //var alreadyExists = await _adminIdentityDbContext.OrganizationTreatmentTypes
+            //    .AnyAsync(ott => model.TreatmentTypes.Select(tt => tt.Value).Contains(ott.OrganizationCode));
 
-            if (alreadyExists)
-            {
-                CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "One of the updated values is already linked to an organization.", "Invalid Organization code");
-                return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
-            }
+            //if (alreadyExists)
+            //{
+            //    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "One of the updated values is already linked to an organization.", "Invalid Organization code");
+            //    return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
+            //}
 
             var organizationTreatmentTypesToUpdate = await _adminIdentityDbContext.OrganizationTreatmentTypes
                 .Where(ott => ott.OrganizationId == model.OrganizationId && model.TreatmentTypes.Select(tt => tt.TreatmentTypeId).Contains(ott.TreatmentTypeId))
