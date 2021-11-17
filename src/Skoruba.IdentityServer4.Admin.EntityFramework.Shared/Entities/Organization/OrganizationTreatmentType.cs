@@ -13,5 +13,19 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organiza
         public virtual TreatmentType TreatmentType { get; set; }
 
         public string OrganizationCode { get; set; } // Unique code used by linde to link/invoice the hospital
+
+        public OrganizationTreatmentType() { }
+
+        public OrganizationTreatmentType(int organizationId, int treatmentTypeId, string organizationCode)
+        {
+            OrganizationId = organizationId;
+            TreatmentTypeId = treatmentTypeId;
+            OrganizationCode = organizationCode;
+        }
+
+        public void UpdateValue(string newCode)
+        {
+            OrganizationCode = newCode;
+        }
     }
 }
