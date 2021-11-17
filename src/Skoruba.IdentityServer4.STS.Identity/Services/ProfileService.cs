@@ -2,6 +2,7 @@
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
@@ -41,14 +42,19 @@ namespace Skoruba.IdentityServer4.STS.Identity.Services
             claims = claims.Where(claim => context.RequestedClaimTypes.Contains(claim.Type)).ToList();
 
             // Add custom claims in token here based on user properties or any other source
-            var treatmentTypeClaims = _adminIdentityDbContext.OrganizationTreatmentTypes
+            var organizationTreatmentTypes = _adminIdentityDbContext.OrganizationTreatmentTypes
+                .Include(ott => ott.TreatmentType)
                 .Where(ott => ott.OrganizationId == (user as UserIdentity).OrganizationId)
-                .Select(ott => new Claim(ott.TreatmentType.Name, ott.OrganizationCode))
                 .ToList();
 
+            var organizationTreatmentTypeClaims = organizationTreatmentTypes.Select(ott => new Claim(ott.TreatmentType.Name, ott.OrganizationCode)).ToList();
+            claims.AddRange(organizationTreatmentTypeClaims);
+
+            var treatmentTypeClaims = organizationTreatmentTypes.Select(ott => new Claim("treatmentType", ott.TreatmentType.Name)).ToList();
             claims.AddRange(treatmentTypeClaims);
 
-            //claims.Add(new Claim("CPAP", "123456789")); // Example of custom claim
+            // Example of custom claim
+            //claims.Add(new Claim("CPAP", "123456789"));
 
             context.IssuedClaims = claims;
         }
