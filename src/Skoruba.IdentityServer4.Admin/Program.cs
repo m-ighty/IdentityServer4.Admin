@@ -114,15 +114,19 @@ namespace Skoruba.IdentityServer4.Admin
                  {
                      var configurationRoot = configApp.Build();
 
-                     Log.Information($"Prep adding json file serilogn, identitydata en ideentity server data");
+                     Log.Information($"Prep try adding json file serilogn.json");
                      configApp.AddJsonFile("serilog.json", optional: true, reloadOnChange: true);
+                     Log.Information($"Prep try adding json file identitydata.json");
                      configApp.AddJsonFile("identitydata.json", optional: true, reloadOnChange: true);
+                     Log.Information($"Prep try adding json file identity server data");
                      configApp.AddJsonFile("identityserverdata.json", optional: true, reloadOnChange: true);
 
                      var env = hostContext.HostingEnvironment;
-
+                     Log.Information($"Prep try adding json file serlog {env.EnvironmentName} ");
                      configApp.AddJsonFile($"serilog.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                     Log.Information($"Prep try adding json file identitydata {env.EnvironmentName} ");
                      configApp.AddJsonFile($"identitydata.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                     Log.Information($"Prep try adding json file identityserverdata {env.EnvironmentName} ");
                      configApp.AddJsonFile($"identityserverdata.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
                      if (env.IsDevelopment())
