@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Skoruba.AuditLogging.EntityFramework.DbContexts;
 using Skoruba.AuditLogging.EntityFramework.Entities;
 using Skoruba.IdentityServer4.Admin.Configuration;
@@ -29,7 +30,7 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
         public static async Task ApplyDbMigrationsWithDataSeedAsync<TIdentityServerDbContext, TIdentityDbContext,
             TPersistedGrantDbContext, TLogDbContext, TAuditLogDbContext, TDataProtectionDbContext, TUser, TRole>(
             IHost host, bool applyDbMigrationWithDataSeedFromProgramArguments, SeedConfiguration seedConfiguration,
-            DatabaseMigrationsConfiguration databaseMigrationsConfiguration)
+            DatabaseMigrationsConfiguration databaseMigrationsConfiguration, bool forceProgramArgument)
             where TIdentityServerDbContext : DbContext, IAdminConfigurationDbContext
             where TIdentityDbContext : DbContext
             where TPersistedGrantDbContext : DbContext, IAdminPersistedGrantDbContext
@@ -52,7 +53,7 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 if ((seedConfiguration != null && seedConfiguration.ApplySeed) 
                     || (applyDbMigrationWithDataSeedFromProgramArguments))
                 {
-                    await EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(services);
+                    await EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(services, forceProgramArgument);
                 }
             }
         }
@@ -99,7 +100,7 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
             }
         }
 
-        public static async Task EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(IServiceProvider serviceProvider)
+        public static async Task EnsureSeedDataAsync<TIdentityServerDbContext, TUser, TRole>(IServiceProvider serviceProvider, bool force)
         where TIdentityServerDbContext : DbContext, IAdminConfigurationDbContext
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
@@ -111,8 +112,11 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<TRole>>();
                 var rootConfiguration = scope.ServiceProvider.GetRequiredService<IRootConfiguration>();
 
-                await EnsureSeedIdentityServerData(context, rootConfiguration.IdentityServerDataConfiguration);
-                await EnsureSeedIdentityData(userManager, roleManager, rootConfiguration.IdentityDataConfiguration);
+
+
+                
+                await EnsureSeedIdentityServerData(context, rootConfiguration.IdentityServerDataConfiguration, force);
+                await EnsureSeedIdentityData(userManager, roleManager, rootConfiguration.IdentityDataConfiguration, force);
             }
         }
 
@@ -120,11 +124,23 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
         /// Generate default admin user / role
         /// </summary>
         private static async Task EnsureSeedIdentityData<TUser, TRole>(UserManager<TUser> userManager,
-            RoleManager<TRole> roleManager, IdentityDataConfiguration identityDataConfiguration)
+            RoleManager<TRole> roleManager, IdentityDataConfiguration identityDataConfiguration, bool force)
             where TUser : IdentityUser, new()
             where TRole : IdentityRole, new()
         {
-            if (!await roleManager.Roles.AnyAsync())
+
+
+            DumpDataIdentity(userManager, roleManager);
+
+
+
+
+
+            var applyRoles = !await roleManager.Roles.AnyAsync();
+
+
+            Log.Information($"DB SEEDING Must apply roles: {applyRoles}| ");
+            if (applyRoles | force)
             {
                 // adding roles from seed
                 foreach (var r in identityDataConfiguration.Roles)
@@ -136,12 +152,14 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                             Name = r.Name
                         };
 
+                        Log.Information($"DB SEEDING Must apply identity_roles {role.Name} ");
                         var result = await roleManager.CreateAsync(role);
 
                         if (result.Succeeded)
                         {
                             foreach (var claim in r.Claims)
                             {
+                                Log.Information($"DB SEEDING Must apply identity_roles claims  { role.Name}, {claim.Type}, {claim.Value} ", role.Name, claim.Type, claim.Value);
                                 await roleManager.AddClaimAsync(role, new System.Security.Claims.Claim(claim.Type, claim.Value));
                             }
                         }
@@ -149,12 +167,16 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 }
             }
 
-            if (!await userManager.Users.AnyAsync())
+            var applyUser = !await userManager.Users.AnyAsync();
+
+            Log.Information($"DB SEEDING Must apply user roles: {applyUser} ");
+            if (applyUser | force)
             {
                 // adding users from seed
                 foreach (var user in identityDataConfiguration.Users)
                 {
-                    var identityUser = new TUser
+                    Log.Information($"DB SEEDING adding user: '{user.Username}'");
+                       var identityUser = new TUser
                     {
                         UserName = user.Username,
                         Email = user.Email,
@@ -169,13 +191,17 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
 
                     if (result.Succeeded)
                     {
+                        
                         foreach (var claim in user.Claims)
                         {
+                            Log.Information($"DB SEEDING adding claim: {user.Username}, {claim.Type}, {claim.Value}" );
                             await userManager.AddClaimAsync(identityUser, new System.Security.Claims.Claim(claim.Type, claim.Value));
                         }
 
+                        
                         foreach (var role in user.Roles)
                         {
+                            Log.Information($"DB SEEDING adding roles: {user.Username}, {role}" );
                             await userManager.AddToRoleAsync(identityUser, role);
                         }
                     }
@@ -183,13 +209,35 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
             }
         }
 
+        private static void DumpDataIdentity<TUser, TRole>(UserManager<TUser> userManager, RoleManager<TRole> roleManager)
+            where TUser : IdentityUser, new()
+            where TRole : IdentityRole, new()
+        {
+            Log.Information(" DB SEEDING dump users for db");
+            foreach (var user in userManager.Users.ToList())
+            {
+                Log.Information($"users defined in db: {user.Email} {user.UserName} ");
+            }
+
+            Log.Information(" DB SEEDING dump Roles for db");
+            foreach (var role in roleManager.Roles.ToList())
+            {
+                Log.Information($"IdentityResources defined in db: {role.Name} ");
+            }
+        }
+
         /// <summary>
         /// Generate default clients, identity and api resources
         /// </summary>
-        private static async Task EnsureSeedIdentityServerData<TIdentityServerDbContext>(TIdentityServerDbContext context, IdentityServerDataConfiguration identityServerDataConfiguration)
+        private static async Task EnsureSeedIdentityServerData<TIdentityServerDbContext>(TIdentityServerDbContext context, IdentityServerDataConfiguration identityServerDataConfiguration, bool force)
             where TIdentityServerDbContext : DbContext, IAdminConfigurationDbContext
         {
-            if (!context.IdentityResources.Any())
+            DumpIdentityServerData(context);
+
+            Log.Warning($"using database {context.Database.GetDbConnection().Database},{context.Database.GetDbConnection().DataSource}, waiting 10sec before apply ");
+            var  applyIdentityResource = !await context.IdentityResources.AnyAsync();
+            Log.Information($"DB SEEDING Must apply identityresources: {applyIdentityResource},  force : {force}") ;
+            if (applyIdentityResource | force)
             {
                 foreach (var resource in identityServerDataConfiguration.IdentityResources)
                 {
@@ -199,7 +247,10 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 await context.SaveChangesAsync();
             }
 
-            if (!context.ApiResources.Any())
+            var applyApiResources = ! await context.ApiResources.AnyAsync();
+
+            Log.Information($"DB SEEDING Must apply api resources: {applyApiResources}, force : {force}");
+            if (applyApiResources | force)
             {
                 foreach (var resource in identityServerDataConfiguration.ApiResources)
                 {
@@ -214,7 +265,9 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                 await context.SaveChangesAsync();
             }
 
-            if (!context.Clients.Any())
+            var applyClients = ! await context.Clients.AnyAsync();
+            Log.Information($"DB SEEDING Must apply Clients: {applyClients} | force : {force}");
+            if (applyClients | force)
             {
                 foreach (var client in identityServerDataConfiguration.Clients)
                 {
@@ -232,6 +285,27 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
 
                 await context.SaveChangesAsync();
             }
+        }
+
+        private static void DumpIdentityServerData<TIdentityServerDbContext>(TIdentityServerDbContext context) where TIdentityServerDbContext : DbContext, IAdminConfigurationDbContext
+        {
+            Log.Information("DB SEEDING dump Clients fro db");
+            foreach (var client in context.Clients.ToList()) {
+                Log.Information($"client defined in db: {client.ClientId} ");
+            }
+
+            Log.Information(" DB SEEDING dump IdentityResources fro db");
+            foreach (var res in context.IdentityResources.ToList())
+            {
+                Log.Information($"IdentityResources defined in db: {res.Name} ");
+            }
+            Log.Information(" DB SEEDING dump ApiResources fro db");
+            foreach (var res in context.ApiResources.ToList())
+            {
+                Log.Information($"IdentityResources defined in db: {res.Name} ");
+            }
+
+
         }
     }
 }

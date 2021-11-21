@@ -40,7 +40,7 @@ namespace Skoruba.IdentityServer4.Admin
         {
             var rootConfiguration = CreateRootConfiguration();
             services.AddSingleton(rootConfiguration);
-
+            Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
             // Add DbContexts for Asp.Net Core Identity, Logging and IdentityServer - Configuration store and Operational store
             RegisterDbContexts(services);
 

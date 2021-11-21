@@ -21,6 +21,7 @@ namespace Skoruba.IdentityServer4.Admin
     public class Program
     {
         private const string SeedArgs = "/seed";
+        private const string ForceArgs = "/force";
 
         public static async Task Main(string[] args)
         {
@@ -29,6 +30,9 @@ namespace Skoruba.IdentityServer4.Admin
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
+
+            Log.Information($"ASPNETCORE_ENVIRONMENT is set to '{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}'");
+
 
             try
             {
@@ -53,24 +57,35 @@ namespace Skoruba.IdentityServer4.Admin
         private static async Task ApplyDbMigrationsWithDataSeedAsync(string[] args, IConfiguration configuration, IHost host)
         {
             var applyDbMigrationWithDataSeedFromProgramArguments = args.Any(x => x == SeedArgs);
+            var forceFromProgramArguments = false; // args.Any(x => x == ForceArgs);
+
+
+
             if (applyDbMigrationWithDataSeedFromProgramArguments) args = args.Except(new[] { SeedArgs }).ToArray();
 
             var seedConfiguration = configuration.GetSection(nameof(SeedConfiguration)).Get<SeedConfiguration>();
             var databaseMigrationsConfiguration = configuration.GetSection(nameof(DatabaseMigrationsConfiguration))
                 .Get<DatabaseMigrationsConfiguration>();
-
+            Log.Information($"PREP  seed commandline is set to '{applyDbMigrationWithDataSeedFromProgramArguments}' force from commandline, ${forceFromProgramArguments}, the seed config is set to '{seedConfiguration.ApplySeed}', and migration is set to '{databaseMigrationsConfiguration.ApplyDatabaseMigrations}',  ");
             await DbMigrationHelpers
                 .ApplyDbMigrationsWithDataSeedAsync<IdentityServerConfigurationDbContext, AdminIdentityDbContext,
                     IdentityServerPersistedGrantDbContext, AdminLogDbContext, AdminAuditLogDbContext,
                     IdentityServerDataProtectionDbContext, UserIdentity, UserIdentityRole>(host,
-                    applyDbMigrationWithDataSeedFromProgramArguments, seedConfiguration, databaseMigrationsConfiguration);
+                    applyDbMigrationWithDataSeedFromProgramArguments, seedConfiguration, databaseMigrationsConfiguration, forceFromProgramArguments);
+
+            if (applyDbMigrationWithDataSeedFromProgramArguments || forceFromProgramArguments) {
+                Log.Information("exiting the program because arguments '{force}' or 'SeedArgs' to start the site start with out the parmeters, terminate program ...");
+                
+                Environment.Exit(0);
+            }
+
         }
 
         private static IConfiguration GetConfiguration(string[] args)
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
-
+          
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -99,6 +114,7 @@ namespace Skoruba.IdentityServer4.Admin
                  {
                      var configurationRoot = configApp.Build();
 
+                     Log.Information($"Prep adding json file serilogn, identitydata en ideentity server data");
                      configApp.AddJsonFile("serilog.json", optional: true, reloadOnChange: true);
                      configApp.AddJsonFile("identitydata.json", optional: true, reloadOnChange: true);
                      configApp.AddJsonFile("identityserverdata.json", optional: true, reloadOnChange: true);

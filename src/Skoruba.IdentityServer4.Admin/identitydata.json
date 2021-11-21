@@ -9,7 +9,7 @@
       {
         "Username": "admin",
         "Password": "M-ighty123",
-        "Email": "lieven@m-ighty.com",
+        "Email": "admin@m-ighty.com",
         "Roles": [
           "IdentityAdmin"
         ],
