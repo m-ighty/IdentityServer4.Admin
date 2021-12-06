@@ -34,5 +34,7 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
         public List<SelectItemDto> OrganizationList { get; set; }
 
         public string OrganizationId { get; set; } // We later cast it back to int
+
+        public string OrganizationName { get; set; } 
     }
 }

@@ -13,6 +13,7 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
         public DbSet<UserInvitation> UserInvitations { get; set; }
         public DbSet<TreatmentType> TreatmentTypes { get; set; }
         public DbSet<OrganizationTreatmentType> OrganizationTreatmentTypes { get; set; }
+        public DbSet<UserOrganizationTreatmentType> UserOrganizationTreatmentTypes { get; set; }
 
         public AdminIdentityDbContext(DbContextOptions<AdminIdentityDbContext> options) : base(options)
         {
@@ -82,7 +83,10 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
 
 
             // OrganizationTreatmentType
-            builder.Entity<OrganizationTreatmentType>().HasKey(ott => new { ott.OrganizationId, ott.TreatmentTypeId });
+            builder.Entity<UserInvitation>().HasKey(o => o.Id);
+            builder.Entity<UserInvitation>().Property(o => o.Id).ValueGeneratedOnAdd().IsRequired();
+
+            builder.Entity<OrganizationTreatmentType>().HasIndex(ott => new { ott.OrganizationId, ott.TreatmentTypeId });
 
             builder.Entity<OrganizationTreatmentType>().HasIndex(ott => ott.OrganizationCode).IsUnique();
 
@@ -95,6 +99,21 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
                 .HasForeignKey(ott => ott.TreatmentTypeId);
 
             builder.Entity<OrganizationTreatmentType>().ToTable(TableConsts.OrganizationTreatmentTypes);
+
+            // UserOrganizationTreatmentType
+            builder.Entity<UserOrganizationTreatmentType>().HasKey(uott => new { uott.UserId, uott.OrganizationTreatmentTypeId });
+
+            builder.Entity<UserOrganizationTreatmentType>().HasOne(uott => uott.User)
+                .WithMany(u => u.UserOrganizationTreatmentTypes)
+                .HasForeignKey(uott => uott.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserOrganizationTreatmentType>().HasOne(uott => uott.OrganizationTreatmentType)
+                .WithMany()
+                .HasForeignKey(uott => uott.OrganizationTreatmentTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<UserOrganizationTreatmentType>().ToTable(TableConsts.UserOrganizationTreatmentTypes);
         }
     }
 }

@@ -14,6 +14,10 @@
   <ItemGroup>
     <Compile Remove="Migrations\Identity\20211116094117_AddedTreatmentTypes.cs" />
     <Compile Remove="Migrations\Identity\20211116094117_AddedTreatmentTypes.Designer.cs" />
+    <Compile Remove="Migrations\Identity\20211206120636_AddedUserOrganizationTreatmentType.cs" />
+    <Compile Remove="Migrations\Identity\20211206120636_AddedUserOrganizationTreatmentType.Designer.cs" />
+    <Compile Remove="Migrations\Identity\20211206121105_AddedUserOrganizationTreatmentType.cs" />
+    <Compile Remove="Migrations\Identity\20211206121105_AddedUserOrganizationTreatmentType.Designer.cs" />
   </ItemGroup>
 
     <ItemGroup>

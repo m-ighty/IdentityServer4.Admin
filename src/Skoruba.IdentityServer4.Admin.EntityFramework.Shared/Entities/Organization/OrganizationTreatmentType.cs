@@ -6,6 +6,8 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organiza
 {
     public class OrganizationTreatmentType
     {
+        public int Id { get; set; }
+
         public int OrganizationId { get; set; }
         public virtual Organization Organization { get; set; }
 

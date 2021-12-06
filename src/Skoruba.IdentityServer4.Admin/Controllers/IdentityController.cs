@@ -381,7 +381,6 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var newUser = new TUserDto();
             newUser.OrganizationList = await GetOrganizationList();
 
-
             return View("UserProfile", newUser);
         }
 
@@ -394,6 +393,42 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             user.OrganizationList = await GetOrganizationList();
 
             return View("UserProfile", user);
+        }
+
+        [HttpGet]
+        [Route("[controller]/UserOrganizationTreatmentTypes/{id}")]
+        public async Task<IActionResult> UserOrganizationTreatmentTypes(TKey id)
+        {
+            var user = await _identityService.GetUserAsync(id.ToString());
+            if (user == null) return NotFound();
+
+            var userOrganizationTreatmentTypeDto = new UserOrganizationTreatmentTypeDto()
+            {
+                UserId = user.Id.ToString(),
+                UserName = user.UserName,
+                OrganizationId = Int32.Parse(user.OrganizationId),
+                OrganizationTreatmentTypes = await GetTreatmentTypesByOrganization(user.OrganizationId),
+                AssignedOrganizationTreatmentTypes = await GetUserOrganizationTreatmentTypes(user.Id.ToString())
+        };
+
+            return View(userOrganizationTreatmentTypeDto);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserOrganizationTreatmentTypes(TUserDto user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(user);
+            }
+
+            TKey userId = user.Id;
+
+            SuccessNotification("Treatment types successfully linked to user", "Success");
+
+            return RedirectToAction(nameof(UserProfile), new { Id = userId });
         }
 
         [HttpGet]
@@ -666,6 +701,24 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         private async Task<List<SelectItemDto>> GetOrganizationList()
         {
             return await _adminIdentityDbContext.Organizations.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
+        }
+
+        private async Task<List<SelectItemDto>> GetTreatmentTypesByOrganization(string organizationId)
+        {
+            return await _adminIdentityDbContext.OrganizationTreatmentTypes
+                .Where(ott => ott.OrganizationId.ToString() == organizationId)
+                .Select(ott => new SelectItemDto(ott.TreatmentTypeId.ToString(), ott.TreatmentType.Name))
+                .ToListAsync();
+        }
+
+        // Temp Example for dev
+        // https://localhost:44303/Identity/UserOrganizationTreatmentTypes/c726f2b6-edfb-49f0-837b-869a6e6b0745
+        private async Task<List<AssignedOrganizationTreatmentTypeDto>> GetUserOrganizationTreatmentTypes(string userId)
+        {
+            return await _adminIdentityDbContext.UserOrganizationTreatmentTypes
+                .Where(uott => uott.UserId == userId)
+                .Select(uott => new AssignedOrganizationTreatmentTypeDto(uott.OrganizationTreatmentTypeId, uott.OrganizationTreatmentType.TreatmentType.Name))
+                .ToListAsync();
         }
 
         private async Task<List<SelectItemDto>> GetRoleList()
