@@ -33,6 +33,7 @@
             <div class="col-md-12 col-m-b-10  col-m-t-10">
                 <a asp-action="UserClaims" asp-route-id="@Model.Id" class="btn btn-outline-primary">@Localizer["ButtonManageUserClaims"]</a>
                 <a asp-action="UserRoles" asp-route-id="@Model.Id" class="btn btn-outline-primary">@Localizer["ButtonManageUserRoles"]</a>
+                <a asp-action="UserOrganizationTreatmentTypes" asp-route-id="@Model.Id" class="btn btn-outline-primary">Manage Organization Treatment Types</a>
                 <a asp-action="UserProviders" asp-route-id="@Model.Id" class="btn btn-outline-primary">@Localizer["ButtonManageUserExternalProviders"]</a>
                 <a asp-action="AuditLog" asp-controller="Log" asp-route-subjectIdentifier="@Model.Id" class="btn btn-primary">@Localizer["Audit Log"]</a>
                 <a asp-action="UserChangePassword" asp-route-id="@Model.Id" class="btn btn-dark">@Localizer["ButtonChangePassword"]</a>

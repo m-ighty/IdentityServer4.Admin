@@ -16,18 +16,20 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
         public List<SelectItemDto> OrganizationTreatmentTypes { get; set; } // All the OrganizationTreatmentTypes in the DB
         public List<AssignedOrganizationTreatmentTypeDto> AssignedOrganizationTreatmentTypes { get; set; } // Already assigned OrganisationTreatmentTypes
 
-        public int NewTreatmentTypeId { get; set; }
+        public int NewOrganizationTreatmentTypeId { get; set; }
     }
 
     public class AssignedOrganizationTreatmentTypeDto
     {
-        public int TreatmentTypeId { get; set; }
+        public int OrganizationTreatmentTypeId { get; set; }
+        public string OrganizationCode { get; set; }
         public string Name { get; set; }
 
-        public AssignedOrganizationTreatmentTypeDto(int treatmentTypeId, string name)
+        public AssignedOrganizationTreatmentTypeDto(int organizationTreatmentTypeId, string name, string organizationCode)
         {
-            TreatmentTypeId = treatmentTypeId;
+            OrganizationTreatmentTypeId = organizationTreatmentTypeId;
             Name = name;
+            OrganizationCode = organizationCode;
         }
     }
 }

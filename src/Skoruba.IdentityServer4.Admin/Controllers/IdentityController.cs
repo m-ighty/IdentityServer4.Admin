@@ -366,6 +366,15 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             }
             else
             {
+                var originalOrganizationId = (await _adminIdentityDbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id.ToString())).OrganizationId;
+                if(originalOrganizationId.ToString() != user.OrganizationId)
+                {
+                    // Organization changed -> clear all assigned 'User Organization treament Types'
+                    var assignedUserOrganizationTreatmentTypes = await _adminIdentityDbContext.UserOrganizationTreatmentTypes.Where(uott => uott.UserId == user.Id.ToString()).ToListAsync();
+                    _adminIdentityDbContext.RemoveRange(assignedUserOrganizationTreatmentTypes);
+                    await _adminIdentityDbContext.SaveChangesAsync();
+                }
+
                 var userData = await _identityService.UpdateUserAsync(user);
                 userId = userData.userId;
             }
@@ -395,6 +404,8 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             return View("UserProfile", user);
         }
 
+        // Temp Example for dev
+        // https://localhost:44303/Identity/UserOrganizationTreatmentTypes/c726f2b6-edfb-49f0-837b-869a6e6b0745
         [HttpGet]
         [Route("[controller]/UserOrganizationTreatmentTypes/{id}")]
         public async Task<IActionResult> UserOrganizationTreatmentTypes(TKey id)
@@ -407,7 +418,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
                 UserId = user.Id.ToString(),
                 UserName = user.UserName,
                 OrganizationId = Int32.Parse(user.OrganizationId),
-                OrganizationTreatmentTypes = await GetTreatmentTypesByOrganization(user.OrganizationId),
+                OrganizationTreatmentTypes = await GetOrganizationTreatmentTypesByOrganization(user.OrganizationId, user.Id.ToString()),
                 AssignedOrganizationTreatmentTypes = await GetUserOrganizationTreatmentTypes(user.Id.ToString())
         };
 
@@ -417,18 +428,33 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UserOrganizationTreatmentTypes(TUserDto user)
+        public async Task<IActionResult> UserOrganizationTreatmentTypes(UserOrganizationTreatmentTypeDto model)
         {
             if (!ModelState.IsValid)
             {
-                return View(user);
+                return View(model);
             }
 
-            TKey userId = user.Id;
+            var newUserOrganizationTreatmentType = new UserOrganizationTreatmentType(model.UserId, model.NewOrganizationTreatmentTypeId);
+            await _adminIdentityDbContext.AddAsync(newUserOrganizationTreatmentType);
+            await _adminIdentityDbContext.SaveChangesAsync();
 
             SuccessNotification("Treatment types successfully linked to user", "Success");
 
-            return RedirectToAction(nameof(UserProfile), new { Id = userId });
+            return RedirectToAction(nameof(UserOrganizationTreatmentTypes), new { Id = model.UserId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteUserOrganizationTreatmentType(string userId, int organizationTreatmentTypeId)
+        {
+            var user = await _identityService.GetUserAsync(userId);
+            var userOrganizationTreatmentTypeToDelete = await _adminIdentityDbContext.UserOrganizationTreatmentTypes
+                .FirstOrDefaultAsync(uott => uott.UserId == userId && uott.OrganizationTreatmentTypeId == organizationTreatmentTypeId);
+
+            _adminIdentityDbContext.Remove(userOrganizationTreatmentTypeToDelete);
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(UserOrganizationTreatmentTypes), new { Id = userId });
         }
 
         [HttpGet]
@@ -703,21 +729,23 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             return await _adminIdentityDbContext.Organizations.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
         }
 
-        private async Task<List<SelectItemDto>> GetTreatmentTypesByOrganization(string organizationId)
+        private async Task<List<SelectItemDto>> GetOrganizationTreatmentTypesByOrganization(string organizationId, string userId)
         {
+            //var assignedOrganizationTreatmentTypeIds
+            var assignedOrganizationTreatmentTypeIds = await _adminIdentityDbContext.UserOrganizationTreatmentTypes.Where(uott => uott.UserId == userId).Select(uott => uott.OrganizationTreatmentTypeId).ToListAsync();
+
             return await _adminIdentityDbContext.OrganizationTreatmentTypes
                 .Where(ott => ott.OrganizationId.ToString() == organizationId)
-                .Select(ott => new SelectItemDto(ott.TreatmentTypeId.ToString(), ott.TreatmentType.Name))
+                .Where(ott => !assignedOrganizationTreatmentTypeIds.Contains(ott.Id)) // We filter out the already assigned treatmentTypes
+                .Select(ott => new SelectItemDto(ott.Id.ToString(), ott.TreatmentType.Name))
                 .ToListAsync();
         }
 
-        // Temp Example for dev
-        // https://localhost:44303/Identity/UserOrganizationTreatmentTypes/c726f2b6-edfb-49f0-837b-869a6e6b0745
         private async Task<List<AssignedOrganizationTreatmentTypeDto>> GetUserOrganizationTreatmentTypes(string userId)
         {
             return await _adminIdentityDbContext.UserOrganizationTreatmentTypes
                 .Where(uott => uott.UserId == userId)
-                .Select(uott => new AssignedOrganizationTreatmentTypeDto(uott.OrganizationTreatmentTypeId, uott.OrganizationTreatmentType.TreatmentType.Name))
+                .Select(uott => new AssignedOrganizationTreatmentTypeDto(uott.OrganizationTreatmentTypeId, uott.OrganizationTreatmentType.TreatmentType.Name, uott.OrganizationTreatmentType.OrganizationCode))
                 .ToListAsync();
         }
 

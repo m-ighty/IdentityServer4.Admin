@@ -12,7 +12,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Users">@Localizer["NavigationUsers"]</a></li>
-                <li class="breadcrumb-item" aria-current="page">@Model.UserName</li>
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="UserProfile" asp-route-id="@Model.UserId">@Model.UserName</a></li>
                 <li class="breadcrumb-item active" aria-current="page">User Organization Treatment Types</li>
             </ol>
         </nav>
@@ -32,36 +32,26 @@
     <div class="card mt-3">
         <h5 class="card-header">User Organization Treatment Types</h5>
         <div class="card-body">
-            <div class="row">
-                <div class="col-sm-12">
-                    User Organization Treatment Types
-
-                    <!--Button-->
-                    <div class="form-group row">
-                        <label class="col-sm-3 col-form-label">
-                        </label>
-                        <div class="col-sm-9">
-                            <button type="submit" class="btn btn-primary">Save Organization Treatment Types</button>
-                        </div>
-                    </div>
-                </div>
+            <strong>Assign new Organization Treatment Type</strong>
+            <div class="d-flex flex-row">
+                <select asp-for="NewOrganizationTreatmentTypeId" asp-items="@(new SelectList(Model.OrganizationTreatmentTypes, "Id", "Text"))" class="form-control single-select"></select>
+                <button style="min-width:200px" type="submit" class="btn btn-primary"><span class="oi oi-plus mr-2"></span> Add Treatment Type</button>
             </div>
         </div>
     </div>
 </form>
 
-<!-- SECOND FORM: UPDATE EXISTING ORGANIZATION TREATMENT TYPES -->
+<!-- SECOND FORM: OVERVIEW (AND DELETE) EXISTING USER ORGANIZATION TREATMENT TYPES -->
 <div class="card mt-3">
     <div class="card-body">
         @for (int i = 0; i < Model.AssignedOrganizationTreatmentTypes.Count(); i++)
         {
-            <input type="hidden" asp-for="OrganizationId" />
-            <input type="hidden" asp-for="AssignedOrganizationTreatmentTypes[i].TreatmentTypeId" />
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="AssignedOrganizationTreatmentTypes[i].OrganizationTreatmentTypeId" />
             <div class="d-flex flex-row align-items-center mt-3">
-                <strong style="min-width:150px">@Model.AssignedOrganizationTreatmentTypes[i].Name</strong>
-                <a class="btn btn-danger ml-3" asp-action="DeleteUserOrganizationTreatmentType" asp-route-organizationId="@Model.OrganizationId" asp-route-treatmentTypeId="@Model.AssignedOrganizationTreatmentTypes[i].TreatmentTypeId"><span class="oi oi-x"></span></a>
+                <strong style="min-width:150px">@Model.AssignedOrganizationTreatmentTypes[i].Name (@Model.AssignedOrganizationTreatmentTypes[i].OrganizationCode)</strong>
+                <a class="btn btn-danger ml-3" asp-action="DeleteUserOrganizationTreatmentType" asp-route-userId="@Model.UserId" asp-route-organizationTreatmentTypeId="@Model.AssignedOrganizationTreatmentTypes[i].OrganizationTreatmentTypeId"><span class="oi oi-x"></span></a>
             </div>
-
         }
     </div>
 </div>
