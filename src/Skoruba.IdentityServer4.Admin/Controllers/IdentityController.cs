@@ -104,7 +104,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
             
-            var result = new OrganizationDto(organization.Id, organization.Name);
+            var result = new OrganizationDto(organization.Id, organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
 
             return View(result);
         }
@@ -123,13 +123,13 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             if (!organization.Id.HasValue)
             {
-                newOrganization = new Organization(organization.Name);
+                newOrganization = new Organization(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
                 await _adminIdentityDbContext.Organizations.AddAsync(newOrganization);
             }
             else
             {
                 var existingOrganization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
-                existingOrganization.UpdateName(organization.Name);
+                existingOrganization.UpdateName(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
             }
 
             await _adminIdentityDbContext.SaveChangesAsync();

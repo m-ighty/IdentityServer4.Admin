@@ -42,15 +42,16 @@ namespace Skoruba.IdentityServer4.STS.Identity.Services
             claims = claims.Where(claim => context.RequestedClaimTypes.Contains(claim.Type)).ToList();
 
             // Add custom claims in token here based on user properties or any other source
-            var organizationTreatmentTypes = _adminIdentityDbContext.OrganizationTreatmentTypes
-                .Include(ott => ott.TreatmentType)
-                .Where(ott => ott.OrganizationId == (user as UserIdentity).OrganizationId)
+            var userOrganizationTreatmentTypes = _adminIdentityDbContext.UserOrganizationTreatmentTypes
+                .Include(uott => uott.OrganizationTreatmentType)
+                .ThenInclude(ott => ott.TreatmentType)
+                .Where(uott => uott.UserId == user.Id.ToString())
                 .ToList();
 
-            var organizationTreatmentTypeClaims = organizationTreatmentTypes.Select(ott => new Claim(ott.TreatmentType.Name, ott.OrganizationCode)).ToList();
-            claims.AddRange(organizationTreatmentTypeClaims);
+            var userOrganizationTreatmentTypeClaims = userOrganizationTreatmentTypes.Select(uott => new Claim(uott.OrganizationTreatmentType.TreatmentType.Name, uott.OrganizationTreatmentType.OrganizationCode)).ToList();
+            claims.AddRange(userOrganizationTreatmentTypeClaims);
 
-            var treatmentTypeClaims = organizationTreatmentTypes.Select(ott => new Claim("treatmentType", ott.TreatmentType.Name)).ToList();
+            var treatmentTypeClaims = userOrganizationTreatmentTypes.Select(uott => new Claim("treatmentType", uott.OrganizationTreatmentType.TreatmentType.Name)).ToList();
             claims.AddRange(treatmentTypeClaims);
 
             // Example of custom claim
