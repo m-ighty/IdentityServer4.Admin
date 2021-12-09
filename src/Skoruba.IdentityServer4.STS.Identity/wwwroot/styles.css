@@ -118,7 +118,7 @@ h2 {
     margin-top: 10px;
 }
 
-.c-button {
+.c-button, .cc-compliance a {
     background-color: var(--secondary-color);
     border-style: none;
     color: var(--white);
@@ -130,17 +130,21 @@ h2 {
     text-decoration: none;
     line-height: 40px;
     display: inline-block;
+    font-family: var(--font-family);
+    font-weight: 400;
 }
 
     .c-button + .c-button {
         margin-left: 10px;
     }
 
-    .c-button:hover {
+    .c-button:hover, .cc-compliance a:hover {
+        color: var(--white);
+        text-decoration: none;
         background-color: var(--darker-blue);
     }
 
-    .c-button:active {
+    .c-button:active, .cc-compliance a:hover {
         background-color: var(--darkest-blue);
     }
 
