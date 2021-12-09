@@ -55,11 +55,6 @@
             }
         </div>
         <div class="c-login__footer">
-            <button class="c-button" name="button" form="login-form" value="cancel">@Localizer["Cancel"]</button>
-            @if (RootConfiguration.RegisterConfiguration.Enabled)
-            {
-                <a class="c-button" asp-action="Register" asp-controller="Account">@Localizer["Register"]</a>
-            }
             <a class="c-button" asp-action="ForgotPassword" asp-controller="Account">@Localizer["Forgot"]</a>
             <button class="c-button" name="button" form="login-form" value="login">@Localizer["Login"]</button>
         </div>
