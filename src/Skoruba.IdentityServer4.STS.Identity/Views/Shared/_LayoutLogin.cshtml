@@ -15,8 +15,26 @@
     <title>@RootConfiguration.AdminConfiguration.PageTitle</title>
 </head>
 <body>
-    <img class="c-logo" src="~/images/linde_plc_logo_combi.png" alt="Logo">
-    @RenderBody()
+    
+    
+    <div class="c-login-container">
+        <div class="c-login-image">
+            <img src="~/images/pexels-cottonbro-7578797.jpg" alt="Linde" />
+        </div>
+        <div class="c-login-focus">
+            <div class="c-login-top">
+                <div class="c-login-app-title">
+                    <h1>LIMAH® - Linde Medical At Home</h1>
+                </div>
+                <img class="c-logo" src="~/images/linde_plc_logo_combi.png" alt="Logo">
+            </div>
+            <div class="c-login">
+                @RenderBody()
+            </div>
+        </div>
+        
+    </div>
+    
     <environment include="Development">
         <script src="~/dist/js/bundle.min.js" asp-append-version="true"></script>
     </environment>

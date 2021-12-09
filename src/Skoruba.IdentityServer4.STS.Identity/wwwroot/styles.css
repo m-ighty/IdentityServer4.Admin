@@ -13,7 +13,7 @@
 
 @font-face {
     font-family: "LindeDaxGlobal";
-    src: url("./assets/fonts/lindedaxregweb.woff2") format("woff2"), url("./assets/fonts/lindedaxregweb.woff") format("woff");
+    src: url("./fonts/lindedaxregweb.woff2") format("woff2"), url("./fonts/lindedaxregweb.woff") format("woff");
     font-weight: normal;
     font-style: normal;
 }
@@ -27,12 +27,40 @@ body {
 
 .c-logo {
     height: 60px;
-    position: absolute;
-    top: 24px;
-    right: 48px;
+}
+
+.c-login-container {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+    .c-login-container .c-login-focus {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .c-login-container .c-login-image {
+        width: 700px;
+    }
+
+.c-login-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.c-login-app-title {
+    height: 100%;
+    border-left: 2px solid var(--linde-blue);
+    color: var(--linde-blue);
+    padding: 10px;
 }
 
 .c-login {
+    flex: 1;
     height: 100%;
     display: flex;
     align-items: center;
@@ -45,7 +73,14 @@ body {
 
     .c-login .c-login__form {
         width: 500px;
+        padding: 20px;
     }
+
+.c-login-top {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px 48px;
+}
 
 .c-login__form .c-login__header {
     border-left: 2px solid var(--linde-blue);
@@ -72,7 +107,7 @@ h2 {
 
 .c-login__form .c-login__body {
     margin: 10px 0;
-    border-top: 1px solid var(--linde-light-grey);
+/*    border-top: 1px solid var(--linde-light-grey);*/
     border-bottom: 1px solid var(--linde-light-grey);
     padding: 20px 0;
 }
