@@ -38,13 +38,27 @@ body {
     .c-login-container .c-login-focus {
         flex: 1;
         display: flex;
-        flex-direction: column;
+        flex-direction: column; 
+        position: relative;
     }
 
     .c-login-container .c-login-image {
         width: 700px;
     }
 
+.c-login-focus::before {
+    position: absolute;
+    content: "";
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("images/health-collage.jpg");
+    background-repeat: repeat;
+    background-size: 200px;
+    opacity: 0.5;
+    z-index: -1;
+}
 .c-login-image img {
     width: 100%;
     height: 100%;
@@ -74,6 +88,8 @@ body {
     .c-login .c-login__form {
         width: 500px;
         padding: 20px;
+        background-color: var(--white);
+        border: 1px solid var(--light-steel-blue);
     }
 
 .c-login-top {
