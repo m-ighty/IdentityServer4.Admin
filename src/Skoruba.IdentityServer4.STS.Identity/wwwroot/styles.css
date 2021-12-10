@@ -35,36 +35,29 @@ body {
     height: 100%;
 }
 
-    .c-login-container .c-login-focus {
-        flex: 1;
-        display: flex;
-        flex-direction: column; 
-        position: relative;
-    }
-
-    .c-login-container .c-login-image {
-        width: 700px;
-    }
-
-.c-login-focus::before {
-    position: absolute;
-    content: "";
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("images/health-collage.jpg");
-    background-repeat: repeat;
-    background-size: 200px;
-    opacity: 0.5;
-    z-index: -1;
+.c-login-focus {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
-.c-login-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+
+.c-login-top {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px 48px;
 }
+
+
+.c-login-image {
+    width: 700px;
+}
+
+    .c-login-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
 
 .c-login-app-title {
     height: 100%;
@@ -74,7 +67,7 @@ body {
 }
 
 .c-login {
-    flex: 1;
+    flex: 0.85;
     height: 100%;
     display: flex;
     align-items: center;
@@ -86,24 +79,13 @@ body {
     }
 
     .c-login .c-login__form {
-        width: 500px;
+        width: 700px;
         padding: 20px;
         background-color: var(--white);
-        border: 1px solid var(--light-steel-blue);
     }
 
-.c-login-top {
-    display: flex;
-    justify-content: space-between;
-    padding: 24px 48px;
-}
 
-.c-login__form .c-login__header {
-    border-left: 2px solid var(--linde-blue);
-    line-height: 50px;
-    color: var(--linde-blue);
-    padding: 10px;
-}
+
 
 h1 {
     margin: 0;
@@ -121,9 +103,14 @@ h2 {
     font-size: 20px;
 }
 
+.c-login__form .c-login__header {
+    color: var(--linde-blue);
+    padding: 10px;
+}
+
 .c-login__form .c-login__body {
     margin: 10px 0;
-/*    border-top: 1px solid var(--linde-light-grey);*/
+    border-top: 1px solid var(--linde-light-grey);
     border-bottom: 1px solid var(--linde-light-grey);
     padding: 20px 0;
 }
