@@ -1,6 +1,11 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces.IUserClaimsDto
 @inject IViewLocalizer Localizer
+@inject Skoruba.IdentityServer4.Admin.Configuration.Interfaces.IRootConfiguration RootConfiguration
+
+@{
+    ViewData["ShowNavigation"] = RootConfiguration.AdminConfiguration.Navigation;
+}
 
 @{
     ViewBag.Title = Localizer["PageTitle"];

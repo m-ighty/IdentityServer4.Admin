@@ -2,9 +2,15 @@
 @using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common
 @model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.Interfaces.IOrganizationsDto
 @inject IViewLocalizer Localizer
+@inject Skoruba.IdentityServer4.Admin.Configuration.Interfaces.IRootConfiguration RootConfiguration
 
 @{
-    ViewBag.Title = Localizer["PageTitle"];
+    ViewData["ShowNavigation"] = RootConfiguration.AdminConfiguration.Navigation;
+}
+
+@{
+    @*ViewBag.Title = Localizer["PageTitle"];*@
+    ViewBag.Title = "Organizations";
     Layout = "_Layout";
 }
 
