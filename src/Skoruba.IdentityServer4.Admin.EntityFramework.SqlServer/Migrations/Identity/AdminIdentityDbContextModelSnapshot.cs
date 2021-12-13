@@ -268,6 +268,44 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.SqlServer.Migrations.Ide
                     b.ToTable("Organizations");
                 });
 
+            modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.OrganizationTreatmentType", b =>
+                {
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TreatmentTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OrganizationCode")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("OrganizationId", "TreatmentTypeId");
+
+                    b.HasIndex("OrganizationCode")
+                        .IsUnique()
+                        .HasFilter("[OrganizationCode] IS NOT NULL");
+
+                    b.HasIndex("TreatmentTypeId");
+
+                    b.ToTable("OrganizationTreatmentTypes");
+                });
+
+            modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.TreatmentType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TreatmentTypes");
+                });
+
             modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity.UserIdentity", b =>
                 {
                     b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.Organization", "Organization")
@@ -339,6 +377,21 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.SqlServer.Migrations.Ide
                     b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity.UserIdentityRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId");
+                });
+
+            modelBuilder.Entity("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.OrganizationTreatmentType", b =>
+                {
+                    b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.Organization", "Organization")
+                        .WithMany("OrganizationTreatmentTypes")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization.TreatmentType", "TreatmentType")
+                        .WithMany()
+                        .HasForeignKey("TreatmentTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -1,9 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.OrganizationDto
 @inject IViewLocalizer Localizer
+@inject Skoruba.IdentityServer4.Admin.Configuration.Interfaces.IRootConfiguration RootConfiguration
 
 @{
-    ViewBag.Title = Localizer["Title"];
+    ViewData["ShowNavigation"] = RootConfiguration.AdminConfiguration.Navigation;
+}
+
+@{
+    @*ViewBag.Title = Localizer["Title"];*@
+    ViewBag.Title = "Organization";
     Layout = "_Layout";
 }
 
@@ -32,6 +38,7 @@
         <!--Button-->
         <div class="form-group row">
             <div class="col-sm-12">
+                <a asp-action="OrganizationTreatmentTypes" asp-route-id="@Model.Id" class="btn btn-outline-primary">Manage Treatment Types</a>
                 <a asp-action="OrganizationDelete" asp-route-id="@Model.Id" class="btn btn-danger">Delete Organization</a>
             </div>
         </div>
@@ -64,4 +71,9 @@
             </div>
         </div>
     </div>
+
+    @section Scripts {
+        <!-- Load JS code for the Dynamic ViewModel Lists above -->
+        <script src="~/lib/dynamic-viewmodel-list/dvml.js"></script>
+    }
 </form>

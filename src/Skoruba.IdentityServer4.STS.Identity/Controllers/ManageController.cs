@@ -131,7 +131,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ChangePassword()
+        public async Task<IActionResult> ChangePassword(string returnUrl = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -145,7 +145,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 return RedirectToAction(nameof(SetPassword));
             }
 
-            var model = new ChangePasswordViewModel { StatusMessage = StatusMessage };
+            var model = new ChangePasswordViewModel { StatusMessage = StatusMessage, ReturnUrl = returnUrl };
             return View(model);
         }
 
@@ -176,7 +176,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 
             StatusMessage = _localizer["PasswordChanged"];
 
-            return RedirectToAction(nameof(ChangePassword));
+            return string.IsNullOrEmpty(model.ReturnUrl) ? (IActionResult)RedirectToAction(nameof(ChangePassword)) : Redirect(model.ReturnUrl);
         }
 
         [HttpGet]

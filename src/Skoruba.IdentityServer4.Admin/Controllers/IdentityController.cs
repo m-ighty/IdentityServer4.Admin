@@ -103,7 +103,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
-
+            
             var result = new OrganizationDto(organization.Id, organization.Name);
 
             return View(result);
@@ -141,6 +141,85 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             return RedirectToAction(nameof(Organization), new { Id = organizationId });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddOrganizationTreatmentType(OrganizationTreatmentTypeDto model)
+        {
+            // If treatmentType already exists for this organization:
+            var alreadyExists = await _adminIdentityDbContext.OrganizationTreatmentTypes.AnyAsync(ott => (ott.OrganizationId == model.OrganizationId && ott.TreatmentTypeId == model.NewTreatmentTypeId) || ott.OrganizationCode == model.NewTreatmentTypeValue);
+            if (alreadyExists)
+            {
+                CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "This organization alreay has a value for the selected Treatment Type or organization code already exists", "Invalid Treatment Type");
+                return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
+            }
+
+            var organizationTreatmentType = new OrganizationTreatmentType(model.OrganizationId, model.NewTreatmentTypeId, model.NewTreatmentTypeValue);
+            await _adminIdentityDbContext.OrganizationTreatmentTypes.AddAsync(organizationTreatmentType);
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrganizationTreatmentType(OrganizationTreatmentTypeDto model)
+        {
+            //// If treatmentType already exists for this organization:
+            //var alreadyExists = await _adminIdentityDbContext.OrganizationTreatmentTypes
+            //    .AnyAsync(ott => model.TreatmentTypes.Select(tt => tt.Value).Contains(ott.OrganizationCode));
+
+            //if (alreadyExists)
+            //{
+            //    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "One of the updated values is already linked to an organization.", "Invalid Organization code");
+            //    return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
+            //}
+
+            var organizationTreatmentTypesToUpdate = await _adminIdentityDbContext.OrganizationTreatmentTypes
+                .Where(ott => ott.OrganizationId == model.OrganizationId && model.TreatmentTypes.Select(tt => tt.TreatmentTypeId).Contains(ott.TreatmentTypeId))
+                .ToListAsync();
+            
+            foreach (var ott in organizationTreatmentTypesToUpdate)
+            {
+                ott.UpdateValue(model.TreatmentTypes.First(tt => tt.TreatmentTypeId == ott.TreatmentTypeId).Value);
+            }
+
+            await _adminIdentityDbContext.SaveChangesAsync();
+            SuccessNotification($"Treatment Types updated' Treatment Types updated successfully", "Success");
+
+
+            return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteOrganizationTreatmentType(int organizationId, int treatmentTypeId)
+        {
+            var organizationTreatmentTypeToDelete = await _adminIdentityDbContext.OrganizationTreatmentTypes
+                .FirstOrDefaultAsync(ott => ott.OrganizationId == organizationId && ott.TreatmentTypeId == treatmentTypeId);
+
+            _adminIdentityDbContext.Remove(organizationTreatmentTypeToDelete);
+            await _adminIdentityDbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = organizationId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrganizationTreatmentTypes(int id)
+        {
+            var organization = await _adminIdentityDbContext.Organizations
+                .Include(o => o.OrganizationTreatmentTypes)
+                .ThenInclude(ott => ott.TreatmentType)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (organization == null) return NotFound();
+
+            var selectedList = organization.OrganizationTreatmentTypes.Select(ott => new TreatmentTypeDto() { Name = ott.TreatmentType.Name, TreatmentTypeId = ott.TreatmentTypeId, Value = ott.OrganizationCode }).ToList();
+
+            var alreadyAssignedTreatmentTypeIds = organization.OrganizationTreatmentTypes.Select(ott => ott.TreatmentTypeId).ToList();
+            var result = new OrganizationTreatmentTypeDto(organization.Id, organization.Name, selectedList, await GetTreatmentTypesList(alreadyAssignedTreatmentTypeIds));
+
+            return View(result);
+        }
+        
         [HttpGet]
         public async Task<IActionResult> OrganizationDelete(int id)
         {
@@ -592,6 +671,11 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         private async Task<List<SelectItemDto>> GetRoleList()
         {
             return await _adminIdentityDbContext.Roles.Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
+        }
+
+        private async Task<List<SelectItemDto>> GetTreatmentTypesList(List<int> treatmentTypeIdsToExclude)
+        {
+            return await _adminIdentityDbContext.TreatmentTypes.Where(tt => !treatmentTypeIdsToExclude.Contains(tt.Id)).Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
         }
     }
 }

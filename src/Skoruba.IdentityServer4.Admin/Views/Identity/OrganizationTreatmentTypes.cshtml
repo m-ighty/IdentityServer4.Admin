@@ -1,0 +1,67 @@
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common
+@model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.OrganizationTreatmentTypeDto
+@inject Skoruba.IdentityServer4.Admin.Configuration.Interfaces.IRootConfiguration RootConfiguration
+
+@{
+    ViewData["ShowNavigation"] = RootConfiguration.AdminConfiguration.Navigation;
+}
+
+@{
+    ViewBag.Title = "Treatment Types";
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Organizations">Organizations</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Organization" asp-route-id="@Model.OrganizationId">@Model.OrganizationName</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Treatment Types</li>
+            </ol>
+        </nav>
+    </div>
+
+
+    <div class="col-12">
+        <h2>Organization Treatment Types</h2>
+    </div>
+</div>
+
+<!-- FIRST FORM: ADD ORGANIZATION TREATMENT TYPES -->
+<form id="client-form" asp-controller="Identity" asp-action="AddOrganizationTreatmentType" Method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="OrganizationId" />
+    <div class="card">
+        <div class="card-body">
+            <strong>Add new Treatment Type for @Model.OrganizationName</strong>
+            <div class="d-flex flex-row">
+                <select asp-for="NewTreatmentTypeId" asp-items="@(new SelectList(Model.TreatmentTypesList, "Id", "Text"))" class="form-control single-select"></select>
+                <input type="text" required class="form-control ml-3 mr-3" asp-for="NewTreatmentTypeValue" placeholder="Organization Code">
+                <button style="min-width:200px" type="submit" class="btn btn-primary"><span class="oi oi-plus mr-2"></span> Add Treatment Type</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- SECOND FORM: UPDATE EXISTING ORGANIZATION TREATMENT TYPES -->
+<form id="client-form" asp-controller="Identity" asp-action="UpdateOrganizationTreatmentType" Method="post">
+    <div class="card mt-3">
+        <div class="card-body">
+            <strong>@Model.OrganizationName Treatment Types</strong>
+            @for (int i = 0; i < Model.TreatmentTypes.Count(); i++)
+            {
+                <input type="hidden" asp-for="OrganizationId" />
+                <input type="hidden" asp-for="TreatmentTypes[i].TreatmentTypeId" />
+                <div class="d-flex flex-row align-items-center mt-3">
+                    <strong style="min-width:150px">@Model.TreatmentTypes[i].Name:</strong>
+                    <input type="text" required class="form-control" asp-for="TreatmentTypes[i].Value">
+                    <a class="btn btn-danger ml-3" asp-action="DeleteOrganizationTreatmentType" asp-route-organizationId="@Model.OrganizationId" asp-route-treatmentTypeId="@Model.TreatmentTypes[i].TreatmentTypeId"><span class="oi oi-x"></span></a>
+                </div>
+
+            }
+            <button type="submit" class="btn btn-primary mt-5">Update Treatment Types</button>
+        </div>
+    </div>
+</form>

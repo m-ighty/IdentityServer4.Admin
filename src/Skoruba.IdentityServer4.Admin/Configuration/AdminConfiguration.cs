@@ -21,5 +21,7 @@
 
         public string CustomThemeCss { get; set; }
 
+        public bool Navigation { get; set; }
+
     }
 }
