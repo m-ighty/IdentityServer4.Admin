@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Skoruba.IdentityServer4.Shared.Dtos;
 using Skoruba.IdentityServer4.Shared.Dtos.Identity;
 using Skoruba.IdentityServer4.Shared.Helpers;
+using Skoruba.IdentityServer4.Admin.HttpClients;
 
 namespace Skoruba.IdentityServer4.Admin
 {
@@ -83,6 +84,8 @@ namespace Skoruba.IdentityServer4.Admin
 
             // Add authorization policies for MVC
             RegisterAuthorization(services);
+
+            services.AddPdmtHttpClient(Configuration);
 
             // Add audit logging
             services.AddAuditEventLogging<AdminAuditLogDbContext, AuditLog>(Configuration);

@@ -30,7 +30,7 @@
     ],
     "Users": [
       {
-        "Username": "adminprod",
+        "Username": "admin",
         "Password": "Pa$$word123",
         "Email": "admin@skoruba.com",
         "Roles": [

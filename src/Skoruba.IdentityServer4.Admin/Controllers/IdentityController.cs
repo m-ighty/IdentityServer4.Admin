@@ -19,6 +19,7 @@ using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
 using Skoruba.IdentityServer4.Admin.ExceptionHandling;
 using Skoruba.IdentityServer4.Admin.Helpers.Localization;
+using Skoruba.IdentityServer4.Admin.HttpClients;
 
 namespace Skoruba.IdentityServer4.Admin.Controllers
 {
@@ -55,6 +56,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
             TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> _localizer;
         private readonly AdminIdentityDbContext _adminIdentityDbContext;
+        private readonly PdmtHttpClient _pdmtHttpClient;
         private readonly IRootConfiguration _configuration;
 
         public IdentityController(IIdentityService<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
@@ -64,11 +66,12 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             IGenericControllerLocalizer<IdentityController<TUserDto, TRoleDto, TUser, TRole, TKey, TUserClaim, TUserRole, TUserLogin, TRoleClaim, TUserToken,
                 TUsersDto, TRolesDto, TUserRolesDto, TUserClaimsDto,
                 TUserProviderDto, TUserProvidersDto, TUserChangePasswordDto, TRoleClaimsDto, TUserClaimDto, TRoleClaimDto>> localizer,
-            AdminIdentityDbContext adminIdentityDbContext, IRootConfiguration configuration) : base(logger)
+            AdminIdentityDbContext adminIdentityDbContext, PdmtHttpClient pdmtHttpClient, IRootConfiguration configuration) : base(logger)
         {
             _identityService = identityService;
             _localizer = localizer;
             _adminIdentityDbContext = adminIdentityDbContext;
+            _pdmtHttpClient = pdmtHttpClient;
             _configuration = configuration;
         }
 
@@ -125,14 +128,31 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             {
                 newOrganization = new Organization(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
                 await _adminIdentityDbContext.Organizations.AddAsync(newOrganization);
+                await _adminIdentityDbContext.SaveChangesAsync();
+
+                // Also create organization in FHIR:
+                var result = await _pdmtHttpClient.AddOrganization(newOrganization);
+                if (!result.IsSuccessStatusCode)
+                {
+                    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to add the organization in FHIR", "FHIR ERROR");
+                }
             }
             else
             {
                 var existingOrganization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
                 existingOrganization.UpdateName(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+                await _adminIdentityDbContext.SaveChangesAsync();
+
+                // Also update organization in FHIR:
+                var result = await _pdmtHttpClient.UpdateOrganization(existingOrganization);
+                if (!result.IsSuccessStatusCode)
+                {
+                    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to update the organization in FHIR", "FHIR ERROR");
+                }
+
             }
 
-            await _adminIdentityDbContext.SaveChangesAsync();
+            
 
             organizationId = organization.Id.HasValue ? organization.Id.Value : newOrganization.Id;
 
@@ -157,6 +177,18 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             await _adminIdentityDbContext.OrganizationTreatmentTypes.AddAsync(organizationTreatmentType);
             await _adminIdentityDbContext.SaveChangesAsync();
 
+            // Also create organizationTreatmentType in FHIR:
+            var organizationTreatmentTypeInDb = await _adminIdentityDbContext.OrganizationTreatmentTypes
+                .Include(ott => ott.TreatmentType)
+                .Where(ott => ott.Id == organizationTreatmentType.Id)
+                .FirstOrDefaultAsync();
+
+            var result = await _pdmtHttpClient.AddDepartment(organizationTreatmentTypeInDb);
+            if (!result.IsSuccessStatusCode)
+            {
+                CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to add the department in FHIR", "FHIR ERROR");
+            }
+
             return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
         }
 
@@ -164,17 +196,8 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateOrganizationTreatmentType(OrganizationTreatmentTypeDto model)
         {
-            //// If treatmentType already exists for this organization:
-            //var alreadyExists = await _adminIdentityDbContext.OrganizationTreatmentTypes
-            //    .AnyAsync(ott => model.TreatmentTypes.Select(tt => tt.Value).Contains(ott.OrganizationCode));
-
-            //if (alreadyExists)
-            //{
-            //    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "One of the updated values is already linked to an organization.", "Invalid Organization code");
-            //    return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
-            //}
-
             var organizationTreatmentTypesToUpdate = await _adminIdentityDbContext.OrganizationTreatmentTypes
+                .Include(ott => ott.TreatmentType)
                 .Where(ott => ott.OrganizationId == model.OrganizationId && model.TreatmentTypes.Select(tt => tt.TreatmentTypeId).Contains(ott.TreatmentTypeId))
                 .ToListAsync();
             
@@ -185,6 +208,18 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             await _adminIdentityDbContext.SaveChangesAsync();
             SuccessNotification($"Treatment Types updated' Treatment Types updated successfully", "Success");
+
+
+            // Also update department in FHIR:
+            foreach (var ott in organizationTreatmentTypesToUpdate)
+            {
+                var result = await _pdmtHttpClient.UpdateDepartment(ott);
+                if (!result.IsSuccessStatusCode)
+                {
+                    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to update the organization in FHIR", "FHIR ERROR");
+                }
+            }
+
 
 
             return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = model.OrganizationId });
@@ -198,6 +233,13 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             _adminIdentityDbContext.Remove(organizationTreatmentTypeToDelete);
             await _adminIdentityDbContext.SaveChangesAsync();
+
+            // Also delete organization in FHIR:
+            var result = await _pdmtHttpClient.DeleteDepartment(organizationTreatmentTypeToDelete);
+            if (!result.IsSuccessStatusCode)
+            {
+                CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to delete the organization in FHIR", "FHIR ERROR");
+            }
 
             return RedirectToAction(nameof(OrganizationTreatmentTypes), new { Id = organizationId });
         }
@@ -235,11 +277,30 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OrganizationDelete(OrganizationDto organization)
         {
-            var organizationToRemove = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
-            _adminIdentityDbContext.Organizations.Remove(organizationToRemove);
+            var organizationToRemove = await _adminIdentityDbContext.Organizations
+                .Include(o => o.OrganizationTreatmentTypes)
+                .FirstOrDefaultAsync(o => o.Id == organization.Id);
+            _adminIdentityDbContext.Organizations.Remove(organizationToRemove); // This also deletes all the related OrganizationTreatmentTypes in the DB
             await _adminIdentityDbContext.SaveChangesAsync();
 
             SuccessNotification("Organization is successfully deleted!", "Success");
+
+            // Also delete organization in FHIR:
+            var result = await _pdmtHttpClient.DeleteOrganization(organizationToRemove);
+            if (!result.IsSuccessStatusCode)
+            {
+                CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to delete the organization in FHIR", "FHIR ERROR");
+            }
+
+            // Also delete all the departments in FHIR
+            foreach (var ott in organizationToRemove.OrganizationTreatmentTypes)
+            {
+                var ottResult = await _pdmtHttpClient.DeleteDepartment(ott);
+                if (!ottResult.IsSuccessStatusCode)
+                {
+                    CreateNotification(Helpers.NotificationHelpers.AlertType.Error, "Failed to delete the organization in FHIR", "FHIR ERROR");
+                }
+            }
 
             return RedirectToAction(nameof(Organizations));
         }
