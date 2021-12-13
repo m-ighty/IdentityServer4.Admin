@@ -45,6 +45,7 @@ using Skoruba.IdentityServer4.Admin.EntityFramework.Helpers;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Skoruba.IdentityServer4.Shared.Authentication;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
+using System.Net;
 
 namespace Skoruba.IdentityServer4.Admin.Helpers
 {
@@ -403,6 +404,11 @@ namespace Skoruba.IdentityServer4.Admin.Helpers
                         options =>
                         {
                             options.Cookie.Name = adminConfiguration.IdentityAdminCookieName;
+                            options.Events.OnRedirectToAccessDenied = async (ctx) =>
+                            {
+                                ctx.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                                await ctx.Response.CompleteAsync();
+                            };
                         })
                     .AddOpenIdConnect(AuthenticationConsts.OidcAuthenticationScheme, options =>
                     {
