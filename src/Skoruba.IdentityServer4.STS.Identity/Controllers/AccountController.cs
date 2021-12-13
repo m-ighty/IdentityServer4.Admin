@@ -586,8 +586,6 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> RegisterByInvitation(string token, string returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            ViewData["Token"] = token;
             var errorVm = new ErrorViewModel();
 
             // Check if the token is a valid GUID
@@ -629,7 +627,11 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             userInvitation.InvitationPageVisited();
             await _adminIdentityDbContext.SaveChangesAsync();
 
-            return View();
+            return View(new RegisterByInvitationViewModel()
+            {
+                Token = token,
+                ReturnUrl = returnUrl
+            });
         }
 
         [HttpPost]
@@ -639,8 +641,6 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             var errorVm = new ErrorViewModel();
-            ViewData["ReturnUrl"] = returnUrl;
-
             if (!ModelState.IsValid) return View(model);
 
             // Get userInvitation

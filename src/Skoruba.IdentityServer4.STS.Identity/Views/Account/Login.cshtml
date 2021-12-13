@@ -22,18 +22,20 @@
         <form id="login-form" asp-route="Login" method="post">
             <input type="hidden" asp-for="ReturnUrl" />
             <div class="c-form-group">
-                <label for="username">Username</label>
+                <label asp-for="Username"></label>
                 <input type="text" id="username" asp-for="Username" placeholder="@Localizer[LoginPolicyResolutionLocalizer.GetUserNameLocalizationKey(Model.LoginResolutionPolicy)]" aria-label="Username" />
+                <span asp-validation-for="Username" class="c-error"></span>
             </div>
             <div class="c-form-group">
-                <label for="password">Password</label>
+                <label asp-for="Password"></label>
                 <input type="password" id="password" asp-for="Password" placeholder="@Localizer["Password"]" aria-label="Password" />
+                <span asp-validation-for="Password" class="c-error"></span>
             </div>
             @if (Model.AllowRememberLogin)
             {
                 <div class="c-form-group c-checkbox">
                     <input type="checkbox" id="remember-me" asp-for="RememberLogin" />
-                    <label for="remember-me">@Localizer["Remember"]</label>
+                    <label asp-for="RememberLogin">@Localizer["Remember"]</label>
                 </div>
             }
         </form>

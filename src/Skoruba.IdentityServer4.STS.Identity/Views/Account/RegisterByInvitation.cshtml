@@ -22,20 +22,24 @@
             <div class="c-form-group">
                 <label asp-for="UserName">@Localizer["UserName"]</label>
                 <input asp-for="UserName" placeholder="@Localizer["UserName"]" />
+                <span asp-validation-for="UserName" class="c-error"></span>
             </div>
             <div class="c-form-group">
                 <label asp-for="Email">@Localizer["Email"]</label>
                 <input asp-for="Email" placeholder="@Localizer["Email"]" />
+                <span asp-validation-for="Email" class="c-error"></span>
             </div>
             <div class="c-form-group">
                 <label asp-for="Password">@Localizer["Password"]</label>
                 <input asp-for="Password" placeholder="@Localizer["Password"]" />
+                <span asp-validation-for="Password" class="c-error"></span>
             </div>
             <div class="c-form-group">
                 <label asp-for="ConfirmPassword">@Localizer["ConfirmPassword"]</label>
                 <input asp-for="ConfirmPassword" placeholder="@Localizer["ConfirmPassword"]" />
+                <span asp-validation-for="ConfirmPassword" class="c-error"></span>
             </div>
-            <input type="hidden" asp-for="Token" value="@ViewData["Token"]" />
+            <input type="hidden" asp-for="Token" />
         </form>
     </div>
     <div class="c-login__footer">
