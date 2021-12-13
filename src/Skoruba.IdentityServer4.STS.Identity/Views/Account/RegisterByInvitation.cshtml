@@ -9,39 +9,40 @@
     Layout = "_LayoutLogin";
 }
 
-<div class="c-login">
-    <div class="c-login__form">
-        <div class="c-login__header">
-            <h1>@RootConfiguration.AdminConfiguration.PageTitle</h1>
-            <div class="c-sub">Register</div>
-        </div>
-        <div class="c-login__body">
-            @if (!ViewContext.ModelState.IsValid)
-            {
-                <div asp-validation-summary="All" class="c-validation-errors"></div>
-            }
-            <form id="register-form" asp-controller="Account" asp-action="RegisterByInvitation" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
-                <div class="c-form-group">
-                    <label asp-for="UserName">@Localizer["UserName"]</label>
-                    <input asp-for="UserName" placeholder="@Localizer["UserName"]" />
-                </div>
-                <div class="c-form-group">
-                    <label asp-for="Email">@Localizer["Email"]</label>
-                    <input asp-for="Email" placeholder="@Localizer["Email"]" />
-                </div>
-                <div class="c-form-group">
-                    <label asp-for="Password">@Localizer["Password"]</label>
-                    <input asp-for="Password" placeholder="@Localizer["Password"]" />
-                </div>
-                <div class="c-form-group">
-                    <label asp-for="ConfirmPassword">@Localizer["ConfirmPassword"]</label>
-                    <input asp-for="ConfirmPassword" placeholder="@Localizer["ConfirmPassword"]" />
-                </div>
-                <input type="hidden" asp-for="Token" value="@ViewData["Token"]" />
-            </form>
-        </div>
-        <div class="c-login__footer">
-            <button type="submit" form="register-form" class="c-button">@Localizer["Register"]</button>
-        </div>
+<div class="c-login__form">
+    <div class="c-login__header">
+        <div class="c-sub">@Localizer["Title"]</div>
+    </div>
+    <div class="c-login__body">
+        @if (!ViewContext.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="c-validation-errors"></div>
+        }
+        <form id="register-form" asp-controller="Account" asp-action="RegisterByInvitation" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post">
+            <div class="c-form-group">
+                <label asp-for="UserName">@Localizer["UserName"]</label>
+                <input asp-for="UserName" placeholder="@Localizer["UserName"]" />
+                <span asp-validation-for="UserName" class="c-error"></span>
+            </div>
+            <div class="c-form-group">
+                <label asp-for="Email">@Localizer["Email"]</label>
+                <input asp-for="Email" placeholder="@Localizer["Email"]" />
+                <span asp-validation-for="Email" class="c-error"></span>
+            </div>
+            <div class="c-form-group">
+                <label asp-for="Password">@Localizer["Password"]</label>
+                <input asp-for="Password" placeholder="@Localizer["Password"]" />
+                <span asp-validation-for="Password" class="c-error"></span>
+            </div>
+            <div class="c-form-group">
+                <label asp-for="ConfirmPassword">@Localizer["ConfirmPassword"]</label>
+                <input asp-for="ConfirmPassword" placeholder="@Localizer["ConfirmPassword"]" />
+                <span asp-validation-for="ConfirmPassword" class="c-error"></span>
+            </div>
+            <input type="hidden" asp-for="Token" />
+        </form>
+    </div>
+    <div class="c-login__footer">
+        <button type="submit" form="register-form" class="c-button">@Localizer["Register"]</button>
     </div>
 </div>

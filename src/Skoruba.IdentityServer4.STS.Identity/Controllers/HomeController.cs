@@ -10,6 +10,7 @@ using IdentityServer4.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
 using Skoruba.IdentityServer4.STS.Identity.ViewModels.Home;
 
@@ -19,14 +20,18 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
     public class HomeController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
+        private readonly IRootConfiguration _rootConfiguration;
 
-        public HomeController(IIdentityServerInteractionService interaction)
+        public HomeController(IIdentityServerInteractionService interaction, IRootConfiguration rootConfiguration)
         {
             _interaction = interaction;
+            _rootConfiguration = rootConfiguration;
         }
 
         public IActionResult Index()
         {
+            if (!_rootConfiguration.AdminConfiguration.Navigation)
+                return NotFound();
             return View();
         }
 

@@ -1,8 +1,14 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
 @using Skoruba.IdentityServer4.Admin.BusinessLogic.Shared.Dtos.Common
 @model Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity.OrganizationTreatmentTypeDto
+@inject Skoruba.IdentityServer4.Admin.Configuration.Interfaces.IRootConfiguration RootConfiguration
 
 @{
+    ViewData["ShowNavigation"] = RootConfiguration.AdminConfiguration.Navigation;
+}
+
+@{
+    ViewBag.Title = "Treatment Types";
     Layout = "_Layout";
 }
 

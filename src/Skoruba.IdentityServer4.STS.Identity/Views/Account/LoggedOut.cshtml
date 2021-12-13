@@ -1,36 +1,23 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces
 @inject IViewLocalizer Localizer
+@inject IRootConfiguration RootConfiguration
 @model Skoruba.IdentityServer4.STS.Identity.ViewModels.Account.LoggedOutViewModel
 
 @{
-	// set this so the layout rendering sees an anonymous user
-	ViewData["signed-out"] = true;
+    Layout = "_LayoutLogin";
+    // set this so the layout rendering sees an anonymous user
+    ViewData["signed-out"] = true;
 }
 
-<div class="page-header logged-out-container">
-	<h1>
-		@Localizer["Title"]
-		<small>@Localizer["SubTitle"]</small>
-	</h1>
-
-	@if (Model.PostLogoutRedirectUri != null)
-	{
-		<div>
-			@Localizer["Click"] <a class="PostLogoutRedirectUri" href="@Model.PostLogoutRedirectUri">@Localizer["Here"]</a> @Localizer["Return"]
-			<span>@Model.ClientName</span>.
-		</div>
-	}
-
-	@if (Model.SignOutIframeUrl != null)
-	{
-		<iframe width="0" height="0" class="signout" src="@Model.SignOutIframeUrl"></iframe>
-	}
+<div class="c-login">
+    <div class="c-login__form">
+        <div class="c-login__header">
+            <div class="c-sub">@Localizer["Title"]</div>
+        </div>
+        <div class="c-login__body">
+            @Localizer["Click"] <a class="PostLogoutRedirectUri" href="@Model.PostLogoutRedirectUri">@Localizer["Here"]</a> @Localizer["Return"]
+            <span>@Model.ClientName</span>.
+        </div>
+    </div>
 </div>
-
-@section scripts
-	{
-	@if (Model.AutomaticRedirectAfterSignOut)
-	{
-		<script src="~/js/signout-redirect.js"></script>
-	}
-}

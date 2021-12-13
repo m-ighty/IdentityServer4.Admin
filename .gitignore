@@ -281,6 +281,6 @@ __pycache__/
 !/src/Skoruba.IdentityServer4.Admin.BusinessLogic/Events/Log/
 /src/Skoruba.IdentityServer4.Admin.Api/appsettings.Production.json
 
-appsettings.*.json
+#appsettings.*.json
 
 /shared/nginx/certs/
