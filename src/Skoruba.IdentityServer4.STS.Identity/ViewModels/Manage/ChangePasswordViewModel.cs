@@ -7,17 +7,17 @@ namespace Skoruba.IdentityServer4.STS.Identity.ViewModels.Manage
     {
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "OldPassword")]
+        [Display(Name = "OldPassword", Prompt = "OldPasswordPlaceholder")]
         public string OldPassword { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "NewPassword")]
+        [Display(Name = "NewPassword", Prompt = "NewPasswordPlaceholder")]
         public string NewPassword { get; set; }
 
         [DataType(DataType.Password)]
         [Compare("NewPassword")]
-        [Display(Name = "ConfirmPassword")]
+        [Display(Name = "ConfirmPassword", Prompt = "ConfirmPasswordPlaceholder")]
         public string ConfirmPassword { get; set; }
 
         public string StatusMessage { get; set; }
