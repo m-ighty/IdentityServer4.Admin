@@ -29,6 +29,7 @@ using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
+using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
 using Skoruba.IdentityServer4.STS.Identity.Helpers.Localization;
 using Skoruba.IdentityServer4.STS.Identity.ViewModels.Account;
@@ -56,6 +57,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         private readonly IdentityOptions _identityOptions;
         private readonly AdminIdentityDbContext _adminIdentityDbContext;
         private readonly ILogger<AccountController<TUser, TKey>> _logger;
+        private readonly IRootConfiguration _rootConfiguration;
 
         public AccountController(
             UserResolver<TUser> userResolver,
@@ -71,7 +73,8 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             RegisterConfiguration registerConfiguration,
             IdentityOptions identityOptions,
             AdminIdentityDbContext adminIdentityDbContext,
-            ILogger<AccountController<TUser, TKey>> logger)
+            ILogger<AccountController<TUser, TKey>> logger, 
+            IRootConfiguration rootConfiguration)
         {
             _userResolver = userResolver;
             _userManager = userManager;
@@ -87,6 +90,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             _identityOptions = identityOptions;
             _adminIdentityDbContext = adminIdentityDbContext;
             _logger = logger;
+            _rootConfiguration = rootConfiguration;
         }
 
         /// <summary>
@@ -584,7 +588,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterByInvitation(string token, string returnUrl = null)
+        public async Task<IActionResult> RegisterByInvitation(string token)
         {
             var errorVm = new ErrorViewModel();
 
@@ -629,17 +633,15 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 
             return View(new RegisterByInvitationViewModel()
             {
-                Token = token,
-                ReturnUrl = returnUrl
+                Token = token
             });
         }
 
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegisterByInvitation(RegisterByInvitationViewModel model, string returnUrl = null)
+        public async Task<IActionResult> RegisterByInvitation(RegisterByInvitationViewModel model)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
             var errorVm = new ErrorViewModel();
             if (!ModelState.IsValid) return View(model);
 
@@ -691,7 +693,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 else
                 {
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    return Redirect(_rootConfiguration.AdminConfiguration.FrontendUrl);
                 }
             }
 

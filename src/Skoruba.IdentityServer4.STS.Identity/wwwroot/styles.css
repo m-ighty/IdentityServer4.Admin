@@ -156,6 +156,10 @@ h2 {
     margin-top: 10px;
 }
 
+.cc-window {
+    background-color: var(--white);
+}
+
 .c-button, .cc-compliance a {
     background-color: var(--secondary-color);
     border-style: none;
