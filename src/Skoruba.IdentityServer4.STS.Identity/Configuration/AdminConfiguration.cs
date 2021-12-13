@@ -11,5 +11,7 @@
         public string Theme { get; set; }
 
         public string CustomThemeCss { get; set; }
+
+        public bool Navigation { get; set; }
     }
 }
