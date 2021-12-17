@@ -14,10 +14,11 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
         public DbSet<TreatmentType> TreatmentTypes { get; set; }
         public DbSet<OrganizationTreatmentType> OrganizationTreatmentTypes { get; set; }
         public DbSet<UserOrganizationTreatmentType> UserOrganizationTreatmentTypes { get; set; }
+        public DbSet<UserInvitationTreatmentType> UserInvitationTreatmentTypes { get; set; }
 
         public AdminIdentityDbContext(DbContextOptions<AdminIdentityDbContext> options) : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -52,6 +53,14 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts
                 .HasForeignKey(ui => ui.RoleId);
 
             builder.Entity<UserInvitation>().ToTable(TableConsts.UserInvitations);
+
+            builder.Entity<UserInvitationTreatmentType>(entityBuilder =>
+            {
+                entityBuilder.HasKey(e => new { e.UserInvitationId, e.TreatmentTypeId });
+                entityBuilder.HasOne(e => e.UserInvitation).WithMany(e => e.TreatmentTypes).IsRequired();
+                entityBuilder.HasOne(e => e.TreatmentType).WithMany().IsRequired();
+                entityBuilder.ToTable(TableConsts.UserInvitationsTreatmentTypes);
+            });
         }
 
         private void ConfigureOrganizationContext(ModelBuilder builder)

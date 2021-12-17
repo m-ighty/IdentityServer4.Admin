@@ -12,6 +12,7 @@
 
         public const string Organizations = "Organizations";
         public const string UserInvitations = "UserInvitations";
+        public const string UserInvitationsTreatmentTypes = "UserInvitationsTreatmentTypes";
         public const string TreatmentTypes = "TreatmentTypes";
         public const string OrganizationTreatmentTypes = "OrganizationTreatmentTypes";
         public const string UserOrganizationTreatmentTypes = "UserOrganizationTreatmentTypes";
