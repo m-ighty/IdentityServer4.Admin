@@ -331,7 +331,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code }, HttpContext.Request.Scheme);
 
-                await _emailService.SendForgotPasswordEmailAsync(user.Email, callbackUrl);
+                await _emailService.SendForgotPasswordEmailAsync<TUser, TKey>(user, callbackUrl);
 
                 return View("ForgotPasswordConfirmation");
             }
