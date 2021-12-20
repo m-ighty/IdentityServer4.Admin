@@ -359,7 +359,9 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
+                //return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
+                ModelState.AddModelError(string.Empty, "User not found");
+                return View();
             }
 
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
@@ -379,7 +381,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         [AllowAnonymous]
         public IActionResult ResetPasswordConfirmation()
         {
-            return View();
+            return Redirect(_rootConfiguration.AdminConfiguration.FrontendUrl);
         }
 
         [HttpGet]
