@@ -18,7 +18,14 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a asp-controller="Identity" asp-action="Organizations">Organizations</a></li>
-                <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+                @if (Model.Id.HasValue)
+                {
+                    <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item active" aria-current="page">Add Organization</li>
+                }
             </ol>
         </nav>
     </div>

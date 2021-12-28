@@ -91,7 +91,7 @@ namespace Skoruba.IdentityServer4.Admin.HttpClients
 
         private HealthcareProviderDto CreateHealthCareProvider(Organization organization)
         {
-            return new HealthcareProviderDto($"prov-{organization.Id}", organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+            return new HealthcareProviderDto($"prov-{organization.Id}", organization.Name, organization.RizivNumber, organization.AddressLine, organization.City, organization.PostalCode);
         }
 
         private DepartmentDto CreateDepartment(OrganizationTreatmentType organizationTretmentType)

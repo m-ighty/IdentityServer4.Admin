@@ -107,7 +107,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
             
-            var result = new OrganizationDto(organization.Id, organization.RizivNumber, organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+            var result = new OrganizationDto(organization.Id, organization.Name, organization.RizivNumber, organization.AddressLine, organization.City, organization.PostalCode);
 
             return View(result);
         }
