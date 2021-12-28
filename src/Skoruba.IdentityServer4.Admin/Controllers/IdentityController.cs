@@ -107,7 +107,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var organization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == id);
             if (organization == null) return NotFound();
             
-            var result = new OrganizationDto(organization.Id, organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+            var result = new OrganizationDto(organization.Id, organization.RizivNumber, organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
 
             return View(result);
         }
@@ -126,7 +126,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             if (!organization.Id.HasValue)
             {
-                newOrganization = new Organization(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+                newOrganization = new Organization(organization.Name, organization.RizivNumber, organization.AddressLine, organization.City, organization.PostalCode);
                 await _adminIdentityDbContext.Organizations.AddAsync(newOrganization);
                 await _adminIdentityDbContext.SaveChangesAsync();
 
@@ -140,7 +140,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             else
             {
                 var existingOrganization = await _adminIdentityDbContext.Organizations.FirstOrDefaultAsync(o => o.Id == organization.Id);
-                existingOrganization.UpdateName(organization.Name, organization.AddressLine, organization.City, organization.PostalCode);
+                existingOrganization.UpdateName(organization.Name, organization.RizivNumber, organization.AddressLine, organization.City, organization.PostalCode);
                 await _adminIdentityDbContext.SaveChangesAsync();
 
                 // Also update organization in FHIR:

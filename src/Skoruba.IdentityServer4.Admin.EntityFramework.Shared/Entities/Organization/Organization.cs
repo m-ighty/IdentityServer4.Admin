@@ -11,27 +11,29 @@ namespace Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organiza
         public string AddressLine { get; set; }
         public string City { get; set; }
         public string PostalCode { get; set; }
+        public string RizivNumber { get; set; }
 
         public readonly List<OrganizationTreatmentType> _organizationTreatmentTypes;
         public virtual IReadOnlyCollection<OrganizationTreatmentType> OrganizationTreatmentTypes => _organizationTreatmentTypes;
 
         public Organization() {}
 
-        public Organization(string name, string addressLine, string city, string postalCode)
+        public Organization(string name, string rizivNumber, string addressLine, string city, string postalCode)
         {
             Name = name;
+            RizivNumber = rizivNumber;
             AddressLine = addressLine;
             City = city;
-            PostalCode = postalCode;
+            PostalCode = postalCode;  
         }
 
-        public Organization UpdateName(string name, string addressLine, string city, string postalCode)
+        public Organization UpdateName(string name, string rizivNumber, string addressLine, string city, string postalCode)
         {
             Name = name;
+            RizivNumber = rizivNumber;
             AddressLine = addressLine;
             City = city;
             PostalCode = postalCode;
-
             return this;
         }
     }
