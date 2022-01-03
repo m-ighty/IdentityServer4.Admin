@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Razor.Templating.Core;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
@@ -33,7 +34,9 @@ using Skoruba.IdentityServer4.STS.Identity.Configuration;
 using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces;
 using Skoruba.IdentityServer4.STS.Identity.Helpers;
 using Skoruba.IdentityServer4.STS.Identity.Helpers.Localization;
+using Skoruba.IdentityServer4.STS.Identity.Services;
 using Skoruba.IdentityServer4.STS.Identity.ViewModels.Account;
+using Skoruba.IdentityServer4.STS.Identity.ViewModels.Emails;
 using Skoruba.IdentityServer4.STS.Identity.ViewModels.Home;
 
 namespace Skoruba.IdentityServer4.STS.Identity.Controllers
@@ -59,6 +62,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         private readonly AdminIdentityDbContext _adminIdentityDbContext;
         private readonly ILogger<AccountController<TUser, TKey>> _logger;
         private readonly IRootConfiguration _rootConfiguration;
+        private readonly IEmailService _emailService;
 
         public AccountController(
             UserResolver<TUser> userResolver,
@@ -75,7 +79,8 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             IdentityOptions identityOptions,
             AdminIdentityDbContext adminIdentityDbContext,
             ILogger<AccountController<TUser, TKey>> logger,
-            IRootConfiguration rootConfiguration)
+            IRootConfiguration rootConfiguration, 
+            IEmailService emailService)
         {
             _userResolver = userResolver;
             _userManager = userManager;
@@ -92,6 +97,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             _adminIdentityDbContext = adminIdentityDbContext;
             _logger = logger;
             _rootConfiguration = rootConfiguration;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -315,7 +321,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                         break;
                 }
 
-                if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
+                if (user == null || (_identityOptions.SignIn.RequireConfirmedEmail && !await _userManager.IsEmailConfirmedAsync(user)))
                 {
                     // Don't reveal that the user does not exist
                     return View("ForgotPasswordConfirmation");
@@ -325,7 +331,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code }, HttpContext.Request.Scheme);
 
-                await _emailSender.SendEmailAsync(user.Email, _localizer["ResetPasswordTitle"], _localizer["ResetPasswordBody", HtmlEncoder.Default.Encode(callbackUrl)]);
+                await _emailService.SendForgotPasswordEmailAsync<TUser, TKey>(user, callbackUrl);
 
                 return View("ForgotPasswordConfirmation");
             }
@@ -353,7 +359,9 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             if (user == null)
             {
                 // Don't reveal that the user does not exist
-                return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
+                //return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
+                ModelState.AddModelError(string.Empty, "User not found");
+                return View();
             }
 
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
@@ -373,7 +381,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
         [AllowAnonymous]
         public IActionResult ResetPasswordConfirmation()
         {
-            return View();
+            return Redirect(_rootConfiguration.AdminConfiguration.FrontendUrl);
         }
 
         [HttpGet]

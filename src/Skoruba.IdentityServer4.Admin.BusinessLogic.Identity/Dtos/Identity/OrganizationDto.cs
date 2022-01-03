@@ -9,6 +9,7 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
     public class OrganizationDto : IOrganizationDto
     {
         public int? Id { get; set; }
+        public string RizivNumber { get; set; }
         public string Name { get; set; }
         public string AddressLine { get; set; }
         public string City { get; set; }
@@ -22,9 +23,10 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
             Name = name;
         }
 
-        public OrganizationDto(int id, string name, string addressLine, string city, string postalCode)
+        public OrganizationDto(int id, string name, string rizivNumber, string addressLine, string city, string postalCode)
         {
             Id = id;
+            RizivNumber = rizivNumber;
             Name = name;
             AddressLine = addressLine;
             City = city;

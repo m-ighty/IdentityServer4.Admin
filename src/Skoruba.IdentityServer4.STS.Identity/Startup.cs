@@ -14,6 +14,7 @@ using Skoruba.IdentityServer4.STS.Identity.Helpers;
 using System;
 using Microsoft.AspNetCore.DataProtection;
 using Skoruba.IdentityServer4.Shared.Helpers;
+using Skoruba.IdentityServer4.STS.Identity.Services;
 
 namespace Skoruba.IdentityServer4.STS.Identity
 {
@@ -51,7 +52,8 @@ namespace Skoruba.IdentityServer4.STS.Identity
             // Including settings for MVC and Localization
             // If you want to change primary keys or use another db model for Asp.Net Core Identity:
             services.AddMvcWithLocalization<UserIdentity, string>(Configuration);
-
+            services.AddRazorTemplating();
+            services.AddScoped<IEmailService, EmailService>();
             // Add authorization policies for MVC
             RegisterAuthorization(services);
 
