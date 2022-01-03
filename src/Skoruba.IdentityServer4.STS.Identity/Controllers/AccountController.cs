@@ -27,6 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.DbContexts;
 using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Identity;
+using Skoruba.IdentityServer4.Admin.EntityFramework.Shared.Entities.Organization;
 using Skoruba.IdentityServer4.Shared.Configuration.Identity;
 using Skoruba.IdentityServer4.STS.Identity.Configuration;
 using Skoruba.IdentityServer4.STS.Identity.Configuration.Interfaces;
@@ -73,7 +74,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             RegisterConfiguration registerConfiguration,
             IdentityOptions identityOptions,
             AdminIdentityDbContext adminIdentityDbContext,
-            ILogger<AccountController<TUser, TKey>> logger, 
+            ILogger<AccountController<TUser, TKey>> logger,
             IRootConfiguration rootConfiguration)
         {
             _userResolver = userResolver;
@@ -356,7 +357,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             }
 
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Code));
-            var result = await _userManager.ResetPasswordAsync(user, code, model.Password); 
+            var result = await _userManager.ResetPasswordAsync(user, code, model.Password);
 
             if (result.Succeeded)
             {
@@ -606,7 +607,7 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
 
             // Check if an invite exists with the given GUID
             var userInvitation = await _adminIdentityDbContext.UserInvitations.FirstOrDefaultAsync(ui => ui.Id == Guid.Parse(token));
-            if(userInvitation == null)
+            if (userInvitation == null)
             {
                 errorVm.Error = new ErrorMessage()
                 {
@@ -646,10 +647,10 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             if (!ModelState.IsValid) return View(model);
 
             // Get userInvitation
-            var userInvitation = _adminIdentityDbContext.UserInvitations.FirstOrDefault(ui => ui.Id == Guid.Parse(model.Token));
+            var userInvitation = _adminIdentityDbContext.UserInvitations.Include(ui => ui.TreatmentTypes).FirstOrDefault(ui => ui.Id == Guid.Parse(model.Token));
 
             //Check if invite is (still) valid
-            if(userInvitation == null || DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used)
+            if (userInvitation == null || DateTime.UtcNow > userInvitation.ValidTill || userInvitation.Used)
             {
                 errorVm.Error = new ErrorMessage()
                 {
@@ -673,11 +674,17 @@ namespace Skoruba.IdentityServer4.STS.Identity.Controllers
             {
                 // Assign role:
                 var roleName = _adminIdentityDbContext.Roles.Where(r => r.Id == userInvitation.RoleId).Select(r => r.NormalizedName).FirstOrDefault();
-                if(roleName != null)
+                if (roleName != null)
                     await _userManager.AddToRoleAsync(user, roleName);
 
                 // Set the userInvite to USED:
                 userInvitation.InvitationIsUsed();
+                await _adminIdentityDbContext.SaveChangesAsync();
+
+                // Get organization treatment types
+                var treatmentTypeIds = userInvitation.TreatmentTypes.Select(t => t.TreatmentTypeId).ToList();
+                var organizationTreatmentTypes = await _adminIdentityDbContext.OrganizationTreatmentTypes.Where(t => t.OrganizationId == userInvitation.OrganizationId && treatmentTypeIds.Contains(t.TreatmentTypeId)).Select(t => t.Id).ToListAsync();
+                await _adminIdentityDbContext.AddRangeAsync(organizationTreatmentTypes.Select(oTT => new UserOrganizationTreatmentType(user.Id as string, oTT)).ToList());
                 await _adminIdentityDbContext.SaveChangesAsync();
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

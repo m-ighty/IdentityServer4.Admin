@@ -313,7 +313,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
             var newUserInviteLink = new UserInviteLinkDto();
             newUserInviteLink.OrganizationList = await GetOrganizationList();
             newUserInviteLink.RoleList = await GetRoleList();
-
+            newUserInviteLink.TreatmentTypes = await GetInvitationTreatmentTypesList();
             return View(newUserInviteLink);
         }
 
@@ -322,6 +322,10 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         public async Task<IActionResult> UserInviteLink(UserInviteLinkDto userInvite)
         {
             var userInvitation = new UserInvitation(userInvite.RoleId, Int32.Parse(userInvite.OrganizationId));
+            userInvitation.TreatmentTypes = userInvite.TreatmentTypes.Where(t => t.Selected).Select(t => new UserInvitationTreatmentType()
+            {
+                TreatmentTypeId = t.TreatmentTypeId
+            }).ToList();
             await _adminIdentityDbContext.UserInvitations.AddAsync(userInvitation);
             await _adminIdentityDbContext.SaveChangesAsync();
 
@@ -332,7 +336,7 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
 
             userInvite.OrganizationList = await GetOrganizationList();
             userInvite.RoleList = await GetRoleList();
-
+            userInvite.TreatmentTypes = await GetInvitationTreatmentTypesList();
             return View(userInvite);
         }
         #endregion
@@ -818,6 +822,11 @@ namespace Skoruba.IdentityServer4.Admin.Controllers
         private async Task<List<SelectItemDto>> GetTreatmentTypesList(List<int> treatmentTypeIdsToExclude)
         {
             return await _adminIdentityDbContext.TreatmentTypes.Where(tt => !treatmentTypeIdsToExclude.Contains(tt.Id)).Select(o => new SelectItemDto(o.Id.ToString(), o.Name)).ToListAsync();
+        }
+
+        private Task<List<SelectInvitationTreatmentTypeDto>> GetInvitationTreatmentTypesList()
+        {
+            return _adminIdentityDbContext.TreatmentTypes.Select(t => new SelectInvitationTreatmentTypeDto { TreatmentTypeId = t.Id, TreatmentTypeName = t.Name }).ToListAsync();
         }
     }
 }

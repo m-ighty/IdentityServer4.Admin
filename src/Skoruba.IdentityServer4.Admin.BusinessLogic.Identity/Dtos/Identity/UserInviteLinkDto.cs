@@ -12,6 +12,11 @@ namespace Skoruba.IdentityServer4.Admin.BusinessLogic.Identity.Dtos.Identity
         public string RoleId { get; set; }
 
         public List<SelectItemDto> OrganizationList { get; set; }
+
+        public List<SelectInvitationTreatmentTypeDto> TreatmentTypes { get; set; }
+
+        public int[] SelectedTreatmentTypes { get; set; }
+
         public string OrganizationId { get; set; }
     }
 }
